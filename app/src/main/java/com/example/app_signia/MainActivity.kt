@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             APPSIGNIATheme {
                 NavHost(
                     navController = navController,
-                    startDestination = "register"
+                    startDestination = "login"
                 ) {
                     composable("login") {
                         Login(navController)
