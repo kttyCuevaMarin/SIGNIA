@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "595956443369",
+    "project_id": "signia-app-802d0",
+    "storage_bucket": "signia-app-802d0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595956443369:android:a977459718de7a05e82878",
+        "android_client_info": {
+          "package_name": "com.example.app_signia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5t5X-ZtwZVhWfouqPdcYUQJl6-xZgZFQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
