@@ -1,6 +1,6 @@
 # 🤖 Sistema de Agentes e Inteligencia Artificial en SIGNIA
 
-Este documento detalla la arquitectura de Inteligencia Artificial y la orquestación de agentes dentro de **SIGNIA**, diseñada para facilitar la comunicación bidireccional mediante el reconocimiento y traducción de la Lengua de Señas Peruana (LSP).
+Este documento detalla la arquitectura de Inteligencia Artificial, la orquestación de agentes y la estructura técnica actual del proyecto dentro de **SIGNIA**, diseñada para facilitar la comunicación bidireccional mediante el reconocimiento y traducción de la Lengua de Señas Peruana (LSP).
 
 ---
 
@@ -55,7 +55,7 @@ SIGNIA opera mediante un flujo continuo de agentes y modelos divididos en dos fl
 *   **Tecnología Base:** Motor de Reglas de Progreso y Evaluación Asistida por IA.
 *   **Responsabilidad:** 
     *   Gestionar y verificar la correcta ejecución de las señas durante las lecciones prácticas usando la cámara.
-    *   Controlar los algoritmos de gamificación (cálculo de XP diario, persistencia de rachas del usuario en Firebase Firestore).
+    *   Controlar los algoritmos de gamificación (cálculo de XP diario, persistencia de rachas del usuario vinculada a la autenticación).
 
 ---
 
@@ -63,9 +63,29 @@ SIGNIA opera mediante un flujo continuo de agentes y modelos divididos en dos fl
 
 Para asegurar una experiencia de usuario fluida, las respuestas e interacciones de los agentes visuales respetan estrictamente la paleta de colores de la aplicación:
 
-*   **Principal (`#2A835F`):** Indicadores de éxito en el reconocimiento y botones de acción de IA.
-*   **Verde Suave (`#E8F5EF`):** Tarjetas de sugerencias del agente y áreas de feedback.
-*   **Amarillo Racha (`#F4C95D`):** Elementos relacionados con el progreso continuo y alertas motivacionales.
+*   **Principal (`#2A835F`):** Indicadores de éxito en el reconocimiento, botones de acción de IA y elementos destacados.
+*   **Verde Suave (`#E8F5EF`):** Tarjetas de sugerencias del agente, fondos suaves e indicadores de racha/progreso diario.
+*   **Blanco (`#FFFFFF`):** Fondo principal y contraste de los componentes visuales.
+*   **Gris Oscuro (`#263238`):** Títulos, textos descriptivos y tipografías principales.
+*   **Amarillo Racha (`#F4C95D`):** Elementos decorativos y motivacionales de racha de aprendizaje continuo.
+
+---
+
+## 📁 Estructura Actual del Proyecto
+
+El desarrollo del proyecto se ha organizado siguiendo una arquitectura moderna y limpia basada en **Jetpack Compose** para la interfaz de usuario, **Jetpack Navigation** para la orquestación del flujo y **Firebase Auth** para el respaldo de las cuentas.
+
+La estructura actual del código fuente en `app/src/main/java/com/example/app_signia` se compone de:
+
+*   📂 **`MainActivity.kt`**: Punto de entrada de la aplicación móvil. Contiene el contenedor base con el `NavHost` que define e inicializa el flujo de navegación centralizado del sistema (`register` ➔ `login` ➔ `home`).
+*   📂 **`RegisterView.kt`**: Pantalla de registro de nuevos usuarios diseñada de acuerdo al manual de marca. Utiliza los colores corporativos (`#2A835F`, `#E8F5EF`, `#263238`), cuenta con validación de contraseñas, checkbox de términos de uso e integración directa con `Firebase Auth` para la creación de cuentas.
+*   📂 **`Login.kt`**: Pantalla de inicio de sesión con diseño estilizado que incluye campos de texto con iconos descriptivos, visor/ocultador de contraseña, inicio de sesión mediante credenciales de Firebase, alternativas para inicio de sesión social (Google/Apple) y redirección automática hacia la pantalla principal.
+*   📂 **`Home.kt`**: Panel principal que recibe al usuario autenticado. Integra:
+    *   **Barra Superior Personalizada:** Muestra el logotipo oficial de SIGNIA y accesos directos de notificación.
+    *   **Tarjeta de Progreso General:** Saludo personalizado al usuario registrado ("¡Hola, Ana!") e indicador lineal de XP faltante para subir de nivel.
+    *   **Cuadrícula de Funciones Principales:** Acceso directo a los cuatro módulos estipulados de la solución (Reconocimiento de Señas con IA, Traducción de Voz/Texto a LSP, Módulo Educativo "Aprende LSP" y Guía de Uso interactiva).
+    *   **Barra de Navegación Inferior (`NavigationBar`):** Menú inferior elegante para saltar entre Inicio, Traductor, Aprende y Perfil.
+*   📂 **`ui/theme/`**: Configuración centralizada de estilos visuales, colores (`Color.kt`), tipografías (`Type.kt`) y temas base (`Theme.kt`) de Material 3 aplicados en toda la aplicación.
 
 ---
 
