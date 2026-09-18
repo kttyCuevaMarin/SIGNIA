@@ -30,7 +30,10 @@ class MainActivity : ComponentActivity() {
                         RegisterView(navController)
                     }
                     composable("home") {
-                        Home()
+                        Home(navController = navController) // Actualizado para pasar navController
+                    }
+                    composable("practice") {
+                        PracticeScreen(navController = navController) // Nueva ruta agregada
                     }
                 }
             }

@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 // Paleta de colores oficial de SIGNIA
 val SigniaHomePrimary = Color(0xFF2A835F)
@@ -42,36 +44,40 @@ data class SigniaModule(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home() {
+fun Home(navController: NavController = rememberNavController()) {
     var selectedItem by remember { mutableIntStateOf(0) }
-    
+
+    // Cálculo del progreso dinámico
+    val currentProgress = MockProgressData.completedSigns.toFloat() / MockProgressData.totalSigns.toFloat()
+    val progressPercentage = (currentProgress * 100).toInt()
+
     val modules = remember {
         listOf(
             SigniaModule(
                 title = "Reconocimiento de Señas",
                 description = "Usa la cámara para traducir LSP a texto y reproducción de voz en tiempo real.",
                 icon = Icons.Default.CameraAlt,
-                route = "reconocimiento",
+                route = "practice",
                 badgeText = "IA"
             ),
             SigniaModule(
                 title = "Voz/Texto a LSP",
                 description = "Escribe o habla para generar animaciones tridimensionales de las señas correspondientes.",
                 icon = Icons.Default.RecordVoiceOver,
-                route = "animacion"
+                route = "practice"
             ),
             SigniaModule(
                 title = "Aprende LSP",
                 description = "Módulo educativo organizado por categorías: Saludos, familia, números y más.",
                 icon = Icons.Default.School,
-                route = "aprende",
+                route = "practice",
                 badgeText = "Educativo"
             ),
             SigniaModule(
                 title = "Guía de Uso",
                 description = "Manual interactivo para aprender a posicionar las manos y optimizar la traducción.",
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                route = "guia"
+                route = "practice"
             )
         )
     }
@@ -101,7 +107,6 @@ fun Home() {
                     }
                 },
                 actions = {
-
                     Row(
                         modifier = Modifier
                             .background(SigniaHomeStreakYellow.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
@@ -146,7 +151,10 @@ fun Home() {
                     icon = { Icon(Icons.Default.Translate, contentDescription = "Traductor") },
                     label = { Text("Traductor") },
                     selected = selectedItem == 1,
-                    onClick = { selectedItem = 1 },
+                    onClick = {
+                        selectedItem = 1
+                        navController.navigate("practice")
+                    },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = SigniaHomePrimary,
                         selectedTextColor = SigniaHomePrimary,
@@ -157,7 +165,10 @@ fun Home() {
                     icon = { Icon(Icons.Default.Book, contentDescription = "Aprende") },
                     label = { Text("Aprende") },
                     selected = selectedItem == 2,
-                    onClick = { selectedItem = 2 },
+                    onClick = {
+                        selectedItem = 2
+                        navController.navigate("practice")
+                    },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = SigniaHomePrimary,
                         selectedTextColor = SigniaHomePrimary,
@@ -187,7 +198,7 @@ fun Home() {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-
+            // Tarjeta de progreso dinámico (RF10)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -210,20 +221,25 @@ fun Home() {
                         modifier = Modifier.padding(vertical = 4.dp)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text(text = "12 / 30 señas",
+                            // Muestra de señas completadas en tiempo real
+                            Text(
+                                text = "${MockProgressData.completedSigns} / ${MockProgressData.totalSigns} señas",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
-                                color = SigniaHomePrimary)
-                            Text(text = "Nivel básico completado al 40%",
+                                color = SigniaHomePrimary
+                            )
+                            Text(
+                                text = "Nivel básico completado al $progressPercentage%",
                                 fontSize = 12.sp,
-                                color = Color.Gray)
+                                color = Color.Gray
+                            )
                         }
                         Surface(
                             shape = CircleShape,
@@ -235,19 +251,21 @@ fun Home() {
                             }
                         }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(12.dp))
+
+                    // Barra de progreso dinámica
                     LinearProgressIndicator(
-                        progress = { 0.4f },
+                        progress = { currentProgress },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp),
                         color = SigniaHomePrimary,
-                        trackColor = Color.White
+                        trackColor = SigniaHomeSoftGreen
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Faltan 650 XP para el siguiente nivel",
+                        text = "Faltan ${650 - (MockProgressData.completedSigns * 20)} XP para el siguiente nivel",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
@@ -264,7 +282,6 @@ fun Home() {
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-
             modules.chunked(2).forEach { rowModules ->
                 Row(
                     modifier = Modifier
@@ -277,7 +294,7 @@ fun Home() {
                             modifier = Modifier
                                 .weight(1f)
                                 .height(175.dp)
-                                .clickable { /* Navegación */ },
+                                .clickable { navController.navigate(module.route) }, // Evento de navegación activo
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = SigniaHomeWhite),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
