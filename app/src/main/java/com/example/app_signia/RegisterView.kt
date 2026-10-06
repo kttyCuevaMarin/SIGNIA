@@ -29,10 +29,10 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 
-val SigniaPrimary = Color(0xFF2A835F)
-val SigniaSoftGreen = Color(0xFFE8F5EF)
-val SigniaWhite = Color(0xFFE8F5EF)
-val SigniaDarkText = Color(0xFF263238)
+val SigniaPrimary = Color(0xFF2196F3)     // #2196f3
+val SigniaSoftGreen = Color(0xFFB695C0)   // #b695c0
+val SigniaWhite = Color(0xFFDAC9DF)       // #dac9df - Fondo lavanda claro
+val SigniaDarkText = Color(0xFF81638B)    // #81638b
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

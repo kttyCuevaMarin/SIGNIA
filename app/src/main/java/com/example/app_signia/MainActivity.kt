@@ -29,6 +29,9 @@ class MainActivity : ComponentActivity() {
                     composable("register") {
                         RegisterView(navController)
                     }
+                    composable("forgot_password") {
+                        RecuperarPasswordScreen(navController = navController)
+                    }
                     composable("home") {
                         Home(navController = navController) // Actualizado para pasar navController
                     }

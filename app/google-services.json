@@ -12,7 +12,20 @@
           "package_name": "com.example.app_signia"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "595956443369-5hcsgh4kr3hk5mtf4mikffba346msbve.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.app_signia",
+            "certificate_hash": "c1d80980f60c8e5ef42a656f0c73c522a710da06"
+          }
+        },
+        {
+          "client_id": "595956443369-4v6h2e2ltlt96p3vir3uuvqj0ht3u6f8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC5t5X-ZtwZVhWfouqPdcYUQJl6-xZgZFQ"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "595956443369-4v6h2e2ltlt96p3vir3uuvqj0ht3u6f8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
