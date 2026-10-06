@@ -23,12 +23,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 /**
  * PANTALLA DE RECUPERACIÓN DE CONTRASEÑA (SIGNIA)
- * 
  * Permite al usuario ingresar su correo registrado para recibir un enlace oficial de
  * restablecimiento de contraseña enviado directamente por Firebase Auth.
  */
@@ -38,11 +38,9 @@ fun RecuperarPasswordScreen(navController: NavController) {
     val auth = remember { Firebase.auth }
     val context = LocalContext.current
 
-    // Variables de estado
     var correoUsuario by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
 
-    // Función para enviar el correo de recuperación
     fun enviarCorreoRecuperacion() {
         if (correoUsuario.isBlank()) {
             Toast.makeText(context, "Por favor ingresa tu correo electrónico", Toast.LENGTH_SHORT).show()
@@ -52,7 +50,6 @@ fun RecuperarPasswordScreen(navController: NavController) {
         val correoLimpio = correoUsuario.trim().lowercase()
         cargando = true
 
-        // Enviar el correo oficial de recuperación mediante Firebase Auth
         auth.sendPasswordResetEmail(correoLimpio)
             .addOnSuccessListener {
                 cargando = false
@@ -62,7 +59,6 @@ fun RecuperarPasswordScreen(navController: NavController) {
                     Toast.LENGTH_LONG
                 ).show()
 
-                // Regresar a la pantalla de Inicio de Sesión
                 navController.navigate("login") {
                     popUpTo("forgot_password") { inclusive = true }
                 }
@@ -81,15 +77,15 @@ fun RecuperarPasswordScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Recuperar Contraseña", fontWeight = FontWeight.Bold) },
+                title = { Text("Recuperar Contraseña", fontWeight = FontWeight.Bold, color = SigniaDarkPurple) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = SigniaDarkPurple)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = SigniaLightLavender,
-                    titleContentColor = Color(0xFF1A1A1A)
+                    titleContentColor = SigniaDarkPurple
                 )
             )
         },
@@ -105,7 +101,6 @@ fun RecuperarPasswordScreen(navController: NavController) {
         ) {
             Spacer(modifier = Modifier.height(30.dp))
 
-            // Logo corporativo de SIGNIA
             Image(
                 painter = painterResource(id = R.drawable.logo_signia),
                 contentDescription = "Logo SIGNIA",
@@ -118,46 +113,47 @@ fun RecuperarPasswordScreen(navController: NavController) {
                 text = "¿Olvidaste tu contraseña?",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A)
+                color = SigniaDarkPurple
             )
 
             Text(
                 text = "Ingresa tu correo electrónico registrado y te enviaremos un enlace oficial para restablecer tu contraseña de forma segura.",
                 fontSize = 14.sp,
-                color = Color.DarkGray,
+                color = SigniaDarkPurple.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 10.dp, bottom = 32.dp)
             )
 
-            // Campo de texto para ingresar el correo
             OutlinedTextField(
                 value = correoUsuario,
                 onValueChange = { correoUsuario = it },
                 label = { Text("Correo electrónico") },
-                placeholder = { Text("ejemplo@correo.com") },
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = SigniaBluePrimary) },
+                placeholder = { Text("ejemplo@correo.com", color = Color.Gray) },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = SigniaDarkPurple) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
                     focusedBorderColor = SigniaBluePrimary,
-                    unfocusedBorderColor = Color.LightGray
+                    unfocusedBorderColor = SigniaSoftLilac,
+                    focusedTextColor = SigniaDarkPurple,
+                    unfocusedTextColor = SigniaDarkPurple,
+                    cursorColor = SigniaBluePrimary
                 )
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botón para enviar el correo
             Button(
                 onClick = { enviarCorreoRecuperacion() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SigniaBluePrimary),
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = SigniaDarkPurple),
                 enabled = !cargando
             ) {
                 if (cargando) {

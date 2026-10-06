@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">APP-SIGNIA</string>
-    <!-- Remplaza este valor con tu ID de cliente Web de la consola de Firebase -->
-    <string name="default_web_client_id">TU_WEB_CLIENT_ID_DE_FIREBASE</string>
+    <string name="default_web_client_id">595956443369-4v6h2e2ltlt96p3vir3uuvqj0ht3u6f8.apps.googleusercontent.com</string>
 </resources>

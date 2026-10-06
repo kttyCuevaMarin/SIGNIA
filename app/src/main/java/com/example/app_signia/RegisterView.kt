@@ -4,12 +4,10 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,14 +23,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-
-
-val SigniaPrimary = Color(0xFF2196F3)     // #2196f3
-val SigniaSoftGreen = Color(0xFFB695C0)   // #b695c0
-val SigniaWhite = Color(0xFFDAC9DF)       // #dac9df - Fondo lavanda claro
-val SigniaDarkText = Color(0xFF81638B)    // #81638b
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,14 +38,13 @@ fun RegisterView(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var termsAccepted by remember { mutableStateOf(false) }
-    
+
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = SigniaWhite,
-
+        containerColor = SigniaLightLavender
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -62,60 +54,61 @@ fun RegisterView(navController: NavController) {
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Image(
                 painter = painterResource(id = R.drawable.logo_signia),
-                contentDescription = "Logo de seña",
-                modifier = Modifier.size(50.dp)
+                contentDescription = "Logo SIGNIA",
+                modifier = Modifier.size(56.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Text(
                 text = "Crear Cuenta",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = SigniaDarkText
+                color = SigniaDarkPurple
             )
 
             Text(
                 text = "Conectando mundos a través de señas.",
                 fontSize = 14.sp,
-                color = Color.Gray,
+                color = SigniaDarkPurple.copy(alpha = 0.8f),
                 modifier = Modifier.padding(top = 4.dp)
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             // Nombre Completo
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text("Nombre completo",
+                Text(
+                    text = "Nombre completo",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = SigniaDarkText)
+                    color = SigniaDarkPurple
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
                     placeholder = {
-                        Text("Ej. Ana García", color = Color.Black.copy(alpha = 0.6f))
+                        Text("Ej. Ana García", color = Color.Gray)
                     },
                     leadingIcon = {
-                        Icon(Icons.Default.Person, contentDescription = null, tint = Color.Gray)
+                        Icon(Icons.Default.Person, contentDescription = null, tint = SigniaDarkPurple)
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
-
-                        focusedBorderColor = Color.DarkGray,
-                        unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black
+                        focusedBorderColor = SigniaBluePrimary,
+                        unfocusedBorderColor = SigniaSoftLilac,
+                        focusedTextColor = SigniaDarkPurple,
+                        unfocusedTextColor = SigniaDarkPurple,
+                        cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true
                 )
@@ -125,23 +118,32 @@ fun RegisterView(navController: NavController) {
 
             // Correo Electrónico
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text("Correo electrónico", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = SigniaDarkText)
+                Text(
+                    text = "Correo electrónico",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = SigniaDarkPurple
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    placeholder = { Text("correo@ejemplo.com", color = Color.Black.copy(alpha = 0.6f)) },
-                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Color.Gray) },
+                    placeholder = {
+                        Text("correo@ejemplo.com", color = Color.Gray)
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Email, contentDescription = null, tint = SigniaDarkPurple)
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
-                        focusedBorderColor = Color.LightGray,
-                        unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f) ,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black
-
+                        focusedBorderColor = SigniaBluePrimary,
+                        unfocusedBorderColor = SigniaSoftLilac,
+                        focusedTextColor = SigniaDarkPurple,
+                        unfocusedTextColor = SigniaDarkPurple,
+                        cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
@@ -152,34 +154,42 @@ fun RegisterView(navController: NavController) {
 
             // Contraseña
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text("Contraseña", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = SigniaDarkText)
+                Text(
+                    text = "Contraseña",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = SigniaDarkPurple
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    placeholder = { Text("Mínimo 8 caracteres", color = Color.Black.copy(alpha = 0.6f)) },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray) },
+                    placeholder = {
+                        Text("Mínimo 8 caracteres", color = Color.Gray)
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = SigniaDarkPurple)
+                    },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                 contentDescription = null,
-                                tint = Color.Gray
-
+                                tint = SigniaDarkPurple.copy(alpha = 0.6f)
                             )
                         }
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
-                        focusedBorderColor = Color.LightGray,
-                        unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black
+                        focusedBorderColor = SigniaBluePrimary,
+                        unfocusedBorderColor = SigniaSoftLilac,
+                        focusedTextColor = SigniaDarkPurple,
+                        unfocusedTextColor = SigniaDarkPurple,
+                        cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true
                 )
@@ -189,35 +199,42 @@ fun RegisterView(navController: NavController) {
 
             // Confirmar Contraseña
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text("Confirmar contraseña", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = SigniaDarkText)
+                Text(
+                    text = "Confirmar contraseña",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = SigniaDarkPurple
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    placeholder = { Text("Repite tu contraseña",
-                        color = Color.Black.copy(alpha = 0.6f)) },
-                    leadingIcon = { Icon(Icons.Default.Lock,
-                        contentDescription = null, tint = Color.Gray) },
+                    placeholder = {
+                        Text("Repite tu contraseña", color = Color.Gray)
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = SigniaDarkPurple)
+                    },
                     trailingIcon = {
                         IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                             Icon(
                                 imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                 contentDescription = null,
-                                tint = Color.Gray
+                                tint = SigniaDarkPurple.copy(alpha = 0.6f)
                             )
                         }
                     },
                     visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
-                        focusedBorderColor = Color.LightGray,
-                        unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black
+                        focusedBorderColor = SigniaBluePrimary,
+                        unfocusedBorderColor = SigniaSoftLilac,
+                        focusedTextColor = SigniaDarkPurple,
+                        unfocusedTextColor = SigniaDarkPurple,
+                        cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true
                 )
@@ -233,16 +250,19 @@ fun RegisterView(navController: NavController) {
                 Checkbox(
                     checked = termsAccepted,
                     onCheckedChange = { termsAccepted = it },
-                    colors = CheckboxDefaults.colors(checkedColor = SigniaPrimary)
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = SigniaBluePrimary,
+                        uncheckedColor = SigniaDarkPurple
+                    )
                 )
                 Text(
                     text = "Acepto los términos y condiciones de uso.",
                     fontSize = 12.sp,
-                    color = Color.Gray,
+                    color = SigniaDarkPurple
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Boton Registrarse
             Button(
@@ -259,7 +279,7 @@ fun RegisterView(navController: NavController) {
                         Toast.makeText(context, "Debes aceptar los términos", Toast.LENGTH_SHORT).show()
                         return@Button
                     }
-                    
+
                     isLoading = true
                     auth.createUserWithEmailAndPassword(email.trim(), password)
                         .addOnSuccessListener {
@@ -275,26 +295,24 @@ fun RegisterView(navController: NavController) {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SigniaPrimary),
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = SigniaDarkPurple),
                 enabled = !isLoading
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = Color.White,
-                        modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
                     Text(
                         "Registrarse",
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        color = Color.White,
                         fontSize = 16.sp
-
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             // Footer
             Row(
@@ -303,14 +321,16 @@ fun RegisterView(navController: NavController) {
             ) {
                 Text(
                     text = "¿Ya tienes cuenta? ",
-                    fontSize = 14.sp, color = Color.Gray)
+                    fontSize = 14.sp,
+                    color = SigniaDarkPurple.copy(alpha = 0.8f)
+                )
                 TextButton(
                     onClick = { navController.navigate("login") },
                     contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(
                         text = "Inicia sesión",
-                        color = SigniaPrimary,
+                        color = SigniaBluePrimary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )

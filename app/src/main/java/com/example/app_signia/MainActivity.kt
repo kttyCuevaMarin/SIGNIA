@@ -41,6 +41,8 @@ class MainActivity : ComponentActivity() {
                     composable("practice") {
                         PracticeScreen(navController = navController, category = "saludos")
                     }
+
+
                     composable(
                         route = "practice/{category}",
                         arguments = listOf(navArgument("category") { type = NavType.StringType })
@@ -50,6 +52,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("perfil") {
                         PerfilScreen(navController = navController)
+                    }
+                    composable("racha") {
+                        RachaScreen(navController = navController)
                     }
                 }
             }

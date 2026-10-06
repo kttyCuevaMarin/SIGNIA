@@ -3,7 +3,6 @@ package com.example.app_signia
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
-import com.example.app_signia.R
 
 // Estructura de cada pregunta de práctica
 data class Exercise(
@@ -20,7 +19,7 @@ object MockProgressData {
     var completedSigns by mutableIntStateOf(14)
     val totalSigns = 30
 
-    // Diccionario de ejercicios específicos por categoría para que cada módulo muestre lo que le corresponde
+    // Diccionario de ejercicios específicos por categoría
     val categoryExercises = mapOf(
         "saludos" to Exercise(
             id = 1,

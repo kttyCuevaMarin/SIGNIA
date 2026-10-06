@@ -1,5 +1,6 @@
 package com.example.app_signia
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,15 +12,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.app_signia.ui.theme.*
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 /**
  * PANTALLA DE PRÁCTICA/EJERCICIOS POR CATEGORÍA
- * Carga el ejercicio específico correspondiente a la categoría seleccionada
+ * Carga el ejercicio específico correspondiente a la categoría seleccionada,
+ * actualiza la racha de aprendizaje (RF17) y utiliza la paleta oficial de SIGNIA.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,7 +33,10 @@ fun PracticeScreen(
     navController: NavController,
     category: String = "saludos"
 ) {
-    // Obtener el ejercicio específico correspondiente a la categoría elegida
+    val context = LocalContext.current
+    val auth = remember { Firebase.auth }
+    val currentUser = auth.currentUser
+
     val exercise = MockProgressData.categoryExercises[category]
         ?: MockProgressData.categoryExercises["saludos"]!!
 
@@ -36,7 +45,7 @@ fun PracticeScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
-        containerColor = HomeLightLavender,
+        containerColor = SigniaLightLavender,
         topBar = {
             TopAppBar(
                 title = {
@@ -44,7 +53,7 @@ fun PracticeScreen(
                         text = exercise.categoryTitle,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = HomeDarkPurple
+                        color = SigniaDarkPurple
                     )
                 },
                 navigationIcon = {
@@ -52,11 +61,11 @@ fun PracticeScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = HomeDarkPurple
+                            tint = SigniaDarkPurple
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = HomeLightLavender)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender)
             )
         }
     ) { paddingValues ->
@@ -72,25 +81,32 @@ fun PracticeScreen(
                 text = "Relaciona la seña con la palabra correcta:",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = HomeDarkPurple
+                color = SigniaDarkPurple
             )
 
             // Mostrar la imagen del ejercicio (si existe) o un contenedor ilustrativo
             if (exercise.imageRes != 0) {
-                Image(
-                    painter = painterResource(id = exercise.imageRes),
-                    contentDescription = "Seña a identificar",
-                    modifier = Modifier
-                        .size(220.dp)
-                        .padding(8.dp)
-                )
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = exercise.imageRes),
+                        contentDescription = "Seña a identificar",
+                        modifier = Modifier
+                            .size(220.dp)
+                            .padding(12.dp)
+                    )
+                }
             } else {
                 Card(
                     modifier = Modifier
                         .size(200.dp)
                         .padding(8.dp),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -100,7 +116,7 @@ fun PracticeScreen(
                             Icon(
                                 imageVector = Icons.Default.School,
                                 contentDescription = null,
-                                tint = HomeBluePrimary,
+                                tint = SigniaBluePrimary,
                                 modifier = Modifier.size(70.dp)
                             )
                             Spacer(modifier = Modifier.height(10.dp))
@@ -108,7 +124,7 @@ fun PracticeScreen(
                                 text = exercise.word,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
-                                color = HomeDarkPurple
+                                color = SigniaDarkPurple
                             )
                         }
                     }
@@ -118,6 +134,7 @@ fun PracticeScreen(
             // Opciones de respuesta
             Column(modifier = Modifier.fillMaxWidth()) {
                 exercise.options.forEach { option ->
+                    val isSelected = selectedOption == option
                     Button(
                         onClick = {
                             selectedOption = option
@@ -128,18 +145,22 @@ fun PracticeScreen(
                             .fillMaxWidth()
                             .padding(vertical = 5.dp)
                             .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = if (selectedOption == option) {
-                            ButtonDefaults.buttonColors(containerColor = HomeBluePrimary)
+                        shape = RoundedCornerShape(14.dp),
+                        colors = if (isSelected) {
+                            ButtonDefaults.buttonColors(containerColor = SigniaBluePrimary)
                         } else {
-                            ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = HomeDarkPurple)
-                        }
+                            ButtonDefaults.buttonColors(
+                                containerColor = Color.White,
+                                contentColor = SigniaDarkPurple
+                            )
+                        },
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
                     ) {
                         Text(
                             text = option,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = if (selectedOption == option) Color.White else HomeDarkPurple
+                            color = if (isSelected) Color.White else SigniaDarkPurple
                         )
                     }
                 }
@@ -148,7 +169,7 @@ fun PracticeScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = error,
-                        color = Color(0xFFD32F2F),
+                        color = SigniaError,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 13.sp,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -163,6 +184,16 @@ fun PracticeScreen(
                         if (MockProgressData.completedSigns < MockProgressData.totalSigns) {
                             MockProgressData.completedSigns += 1
                         }
+
+                        // Actualizar la racha de aprendizaje (RF17) asociada a la cuenta del usuario
+                        StreakManager.recordLessonCompleted(currentUser?.uid) { nuevaRacha ->
+                            Toast.makeText(
+                                context,
+                                "¡Correcto! Racha actual: $nuevaRacha días 🔥",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
                         navController.popBackStack()
                     } else {
                         errorMessage = "Respuesta incorrecta. ¡Inténtalo de nuevo!"
@@ -172,8 +203,11 @@ fun PracticeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = HomeDarkPurple)
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SigniaDarkPurple,
+                    disabledContainerColor = SigniaDarkPurple.copy(alpha = 0.5f)
+                )
             ) {
                 Text(
                     text = "Confirmar y Guardar Progreso",

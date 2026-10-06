@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.app_signia.ui.theme.*
 
 data class LearningCategory(
     val id: String,
@@ -26,7 +27,7 @@ data class LearningCategory(
     val completedCount: Int,
     val totalCount: Int,
     val icon: ImageVector,
-    val iconBoxColor: Color = HomeSoftLilac.copy(alpha = 0.4f)
+    val iconBoxColor: Color = SigniaSoftLilac.copy(alpha = 0.4f)
 )
 
 /**
@@ -43,7 +44,7 @@ fun AprendeLspScreen(navController: NavController) {
             completedCount = 24,
             totalCount = 24,
             icon = Icons.Default.PanTool,
-            iconBoxColor = HomeBlueSecondary.copy(alpha = 0.4f)
+            iconBoxColor = SigniaBlueSecondary.copy(alpha = 0.4f)
         ),
         LearningCategory(
             id = "familia",
@@ -90,7 +91,7 @@ fun AprendeLspScreen(navController: NavController) {
     )
 
     Scaffold(
-        containerColor = HomeLightLavender,
+        containerColor = SigniaLightLavender,
         topBar = {
             TopAppBar(
                 title = { },
@@ -99,11 +100,11 @@ fun AprendeLspScreen(navController: NavController) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = HomeDarkPurple
+                            tint = SigniaDarkPurple
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = HomeLightLavender)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender)
             )
         }
     ) { paddingValues ->
@@ -119,7 +120,7 @@ fun AprendeLspScreen(navController: NavController) {
                 text = "¿Qué quieres aprender hoy?",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = HomeDarkPurple
+                color = SigniaDarkPurple
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -127,17 +128,17 @@ fun AprendeLspScreen(navController: NavController) {
             Text(
                 text = "Continúa tu progreso en Lengua de Señas Peruana.",
                 fontSize = 14.sp,
-                color = HomeDarkPurple.copy(alpha = 0.8f),
+                color = SigniaDarkPurple.copy(alpha = 0.8f),
                 lineHeight = 20.sp
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Tarjeta de Progreso Total (15%) con paleta corporativa SIGNIA
+            // Tarjeta de Progreso Total (15%) con paleta púrpura y azul
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = HomeDarkPurple),
+                colors = CardDefaults.cardColors(containerColor = SigniaDarkPurple),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
@@ -148,7 +149,7 @@ fun AprendeLspScreen(navController: NavController) {
                     ) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = HomeBluePrimary,
+                            color = SigniaBluePrimary,
                             modifier = Modifier.size(46.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -185,7 +186,7 @@ fun AprendeLspScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp),
-                        color = HomeBlueSecondary,
+                        color = SigniaBlueSecondary,
                         trackColor = Color.White.copy(alpha = 0.3f)
                     )
                 }
@@ -198,13 +199,13 @@ fun AprendeLspScreen(navController: NavController) {
                 text = "MÓDULOS DE APRENDIZAJE",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = HomeDarkPurple,
+                color = SigniaDarkPurple,
                 letterSpacing = 0.8.sp
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Lista de Módulos: Cada uno navega a su propio ejercicio según la categoría elegida
+            // Lista de Módulos
             categories.forEach { category ->
                 val progressFraction = if (category.totalCount > 0) {
                     category.completedCount.toFloat() / category.totalCount.toFloat()
@@ -215,7 +216,6 @@ fun AprendeLspScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
                         .clickable {
-                            // Navega al módulo de práctica pasándole la categoría específica
                             navController.navigate("practice/${category.id}")
                         },
                     shape = RoundedCornerShape(16.dp),
@@ -237,7 +237,7 @@ fun AprendeLspScreen(navController: NavController) {
                                 Icon(
                                     imageVector = category.icon,
                                     contentDescription = category.title,
-                                    tint = HomeBluePrimary,
+                                    tint = SigniaBluePrimary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -257,14 +257,14 @@ fun AprendeLspScreen(navController: NavController) {
                                     text = category.title,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
-                                    color = HomeDarkPurple
+                                    color = SigniaDarkPurple
                                 )
 
                                 Text(
                                     text = "${category.completedCount}/${category.totalCount}",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (category.completedCount == category.totalCount) HomeBluePrimary else HomeDarkPurple.copy(alpha = 0.7f)
+                                    color = if (category.completedCount == category.totalCount) SigniaBluePrimary else SigniaDarkPurple.copy(alpha = 0.7f)
                                 )
                             }
 
@@ -275,8 +275,8 @@ fun AprendeLspScreen(navController: NavController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(6.dp),
-                                color = HomeBluePrimary,
-                                trackColor = HomeLightLavender
+                                color = SigniaBluePrimary,
+                                trackColor = SigniaLightLavender
                             )
                         }
 
@@ -285,7 +285,7 @@ fun AprendeLspScreen(navController: NavController) {
                         Icon(
                             imageVector = Icons.Default.ChevronRight,
                             contentDescription = "Ir",
-                            tint = HomeDarkPurple.copy(alpha = 0.6f),
+                            tint = SigniaDarkPurple.copy(alpha = 0.6f),
                             modifier = Modifier.size(20.dp)
                         )
                     }
