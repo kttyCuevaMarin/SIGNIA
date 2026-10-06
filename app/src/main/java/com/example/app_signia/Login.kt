@@ -1,16 +1,15 @@
 package com.example.app_signia
 
-import android.app.Activity
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -27,108 +25,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.auth.auth
+import android.R.attr.tint as tint
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
 
-val SigniaDarkPurple = Color(0xFF81638B)   // #81638b
-val SigniaSoftLilac = Color(0xFFB695C0)    // #b695c0
-val SigniaLightLavender = Color(0xFFDAC9DF) // #dac9df
-val SigniaBluePrimary = Color(0xFF2196F3)  // #2196f3
 
-val SigniaGreen = SigniaBluePrimary
-val SigniaBackground = SigniaLightLavender
+// Colores del diseño
+val SigniaGreen = Color(0xFF2A835F)
+val SigniaBackground = Color(0xFFE8F5EF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Login(navController: NavController) {
-    // 1. Instancias base de Firebase Auth y contexto
     val auth = remember { Firebase.auth }
     val context = LocalContext.current
 
-    // 2. Estados locales del formulario de Login
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
-    // =========================================================================
-    // 1. AUTENTICACIÓN CON GOOGLE SIGN-IN
-    // =========================================================================
-
-    // ID de Cliente Web Oficial de tu proyecto en Firebase
-    val webClientId = "595956443369-4v6h2e2ltlt96p3vir3uuvqj0ht3u6f8.apps.googleusercontent.com"
-
-    val gso = remember(context) {
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(webClientId)
-            .requestEmail()
-            .build()
-    }
-
-    val googleSignInClient = remember(context, gso) {
-        GoogleSignIn.getClient(context, gso)
-    }
-
-    // Launcher para capturar la respuesta del selector de cuentas de Google
-    val googleLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        isLoading = false
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                val idToken = account?.idToken
-
-                if (!idToken.isNullOrEmpty()) {
-                    isLoading = true
-                    val credential = GoogleAuthProvider.getCredential(idToken, null)
-
-                    auth.signInWithCredential(credential)
-                        .addOnSuccessListener {
-                            isLoading = false
-                            Toast.makeText(context, "¡Sesión iniciada con Google!", Toast.LENGTH_SHORT).show()
-                            navController.navigate("home") {
-                                popUpTo("login") { inclusive = true }
-                            }
-                        }
-                        .addOnFailureListener { error ->
-                            isLoading = false
-                            Toast.makeText(
-                                context,
-                                "Error al autenticar en Firebase: ${error.localizedMessage}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                } else {
-                    Toast.makeText(context, "No se obtuvo el token de Google", Toast.LENGTH_LONG).show()
-                }
-            } catch (e: ApiException) {
-                val mensajeError = when (e.statusCode) {
-                    10 -> "Error 10 (DEVELOPER_ERROR): Falta registrar la huella SHA-1 de tu app en Firebase Console."
-                    12500 -> "Error 12500: Verifica que Google Play Services esté actualizado en tu emulador/celular."
-                    else -> "Error en Google Sign-In (${e.statusCode}): ${e.localizedMessage}"
-                }
-                Toast.makeText(context, mensajeError, Toast.LENGTH_LONG).show()
-            }
-        } else {
-            // El usuario canceló o Google rechazó la petición (común cuando falta el SHA-1 en Firebase)
-            Toast.makeText(
-                context,
-                "Inicio de sesión cancelado. Si el selector se cierra de inmediato, debes registrar la huella SHA-1 en Firebase Console.",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    // =========================================================================
-    // VISTA PRINCIPAL (SCAFFOLD)
-    // =========================================================================
     Scaffold(
         containerColor = SigniaBackground,
     ) { paddingValues ->
@@ -168,7 +86,7 @@ fun Login(navController: NavController) {
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Campo de Correo Electrónico
+            // Campo de Correo
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "Correo electrónico",
@@ -180,25 +98,24 @@ fun Login(navController: NavController) {
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    placeholder = { Text("ejemplo@correo.com", color = Color.Black.copy(alpha = 0.6f)) },
+                    placeholder = { Text("ejemplo@correo.com",
+                        color = Color.Black.copy(alpha = 0.6f)) },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Email,
                             contentDescription = null,
-                            tint = Color.Gray
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
+                            tint = Color.Gray) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
                         focusedBorderColor = Color.LightGray,
                         unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black
-                    ),
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black,
+                                cursorColor = Color.Black
+                            ),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
@@ -206,7 +123,7 @@ fun Login(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Campo de Contraseña y Enlace "¿Olvidé mi contraseña?"
+            // Campo de Contraseña
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -219,9 +136,8 @@ fun Login(navController: NavController) {
                         fontSize = 14.sp,
                         color = Color.Black
                     )
-
                     TextButton(
-                        onClick = { navController.navigate("forgot_password") },
+                        onClick = { },
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(
@@ -232,20 +148,16 @@ fun Login(navController: NavController) {
                         )
                     }
                 }
-
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     placeholder = {
-                        Text("Ingresa tu contraseña", color = Color.Black.copy(alpha = 0.6f))
-                    },
+                        Text("Ingresa tu contraseña",
+                            color = Color.Black.copy(alpha = 0.6f)) },
                     leadingIcon = {
-                        Icon(
-                            Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = Color.Gray
-                        )
-                    },
+                        Icon(Icons.Default.Lock,
+                        contentDescription = null,
+                        tint = Color.Gray) },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
@@ -288,9 +200,9 @@ fun Login(navController: NavController) {
                                 popUpTo("login") { inclusive = true }
                             }
                         }
-                        .addOnFailureListener { error ->
+                        .addOnFailureListener {
                             isLoading = false
-                            Toast.makeText(context, "Error de acceso: ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Error de acceso", Toast.LENGTH_SHORT).show()
                         }
                 },
                 modifier = Modifier
@@ -303,18 +215,21 @@ fun Login(navController: NavController) {
                 if (isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text(
-                        "Entrar",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 16.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Entrar",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            fontSize = 16.sp)
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // Separador
+            // O continúa con
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -331,40 +246,45 @@ fun Login(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón de Google
+            // Google Button
             OutlinedButton(
-                onClick = {
-                    isLoading = true
-                    val signInIntent = googleSignInClient.signInIntent
-                    googleLauncher.launch(signInIntent)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
+                onClick = { },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RoundedCornerShape(12.dp),
                 border = ButtonDefaults.outlinedButtonBorder.copy(width = 0.8.dp),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White),
-                enabled = !isLoading
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        "G ",
+                    // Placeholder simple para Google
+                    Text("G ",
                         color = SigniaGreen,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp
-                    )
-                    Text(
-                        "Google",
+                        fontSize = 18.sp)
+                    Text("Google",
                         color = Color.Black,
-                        fontWeight = FontWeight.Bold
-                    )
+                        fontWeight = FontWeight.Bold)
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Apple Button
+            Button(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.PhoneIphone, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Apple", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
 
-            // Pie de página
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // Footer
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 32.dp)
@@ -380,5 +300,3 @@ fun Login(navController: NavController) {
         }
     }
 }
-
-
