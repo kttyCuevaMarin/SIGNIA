@@ -2,10 +2,18 @@ package com.example.app_signia.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Paleta de Colores Oficial SIGNIA
+val SigniaDarkPurple = Color(0xFF81638B)   // #81638b - Púrpura Oscuro
+val SigniaSoftLilac = Color(0xFFB695C0)    // #b695c0 - Lila Medio
+val SigniaLightLavender = Color(0xFFDAC9DF) // #dac9df - Lavanda Claro de Fondo
+val SigniaBluePrimary = Color(0xFF2196F3)  // #2196f3 - Azul Eléctrico
+val SigniaBlueSecondary = Color(0xFF81C9FA) // #81c9fa - Azul Celeste Secundario
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Colores de compatibilidad de tema
+val Purple80 = SigniaSoftLilac
+val PurpleGrey80 = SigniaLightLavender
+val Pink80 = SigniaBlueSecondary
+
+val Purple40 = SigniaDarkPurple
+val PurpleGrey40 = SigniaSoftLilac
+val Pink40 = SigniaBluePrimary
