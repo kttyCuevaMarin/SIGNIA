@@ -69,7 +69,7 @@ fun Home(navController: NavController = rememberNavController()) {
                 title = "Voz/Texto a LSP",
                 description = "Escribe o habla para generar animaciones tridimensionales de las señas correspondientes.",
                 icon = Icons.Default.RecordVoiceOver,
-                route = "practice",
+                route = "translator",
                 cardBgColor = SigniaSoftLilac,
                 textColor = SigniaDarkPurple
             ),
@@ -86,7 +86,7 @@ fun Home(navController: NavController = rememberNavController()) {
                 title = "Guía de Uso",
                 description = "Manual interactivo para aprender a posicionar las manos y optimizar la traducción.",
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                route = "practice",
+                route = "translator",
                 cardBgColor = SigniaSoftLilac,
                 textColor = SigniaDarkPurple
             )
@@ -168,7 +168,7 @@ fun Home(navController: NavController = rememberNavController()) {
                     selected = selectedItem == 1,
                     onClick = {
                         selectedItem = 1
-                        navController.navigate("practice")
+                        navController.navigate("translator")
                     },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = SigniaBluePrimary,

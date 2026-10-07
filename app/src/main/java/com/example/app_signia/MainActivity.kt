@@ -56,6 +56,16 @@ class MainActivity : ComponentActivity() {
                     composable("racha") {
                         RachaScreen(navController = navController)
                     }
+                    composable("translator") {
+                        TranslatorScreen(navController = navController)
+                    }
+                    composable(
+                        route = "animation_player/{message}",
+                        arguments = listOf(navArgument("message") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val messageParam = backStackEntry.arguments?.getString("message") ?: "Hola"
+                        SignAnimationScreen(navController = navController, message = messageParam)
+                    }
                 }
             }
         }

@@ -15,7 +15,7 @@ val SigniaBlueSecondary = Color(0xFF81C9FA)  // #81c9fa - Azul Celeste Secundari
 val SigniaWhite = Color(0xFFFFFFFF)
 val SigniaDarkText = SigniaDarkPurple
 val SigniaLightBg = SigniaLightLavender
-val SigniaError = Color(0xFFD32F2F)
+val SigniaError = Color(0xFF2196F3)
 
 // Aliases para compatibilidad completa en toda la app
 val HomeDarkPurple = SigniaDarkPurple

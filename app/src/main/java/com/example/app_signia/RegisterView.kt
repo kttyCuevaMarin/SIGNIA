@@ -27,7 +27,6 @@ import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterView(navController: NavController) {
     val auth = remember { Firebase.auth }
@@ -37,11 +36,11 @@ fun RegisterView(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var termsAccepted by remember { mutableStateOf(false) }
+    var termsAccepted by remember { mutableStateOf(value = false) }
 
-    var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(value = false) }
+    var confirmPasswordVisible by remember { mutableStateOf(value = false) }
+    var isLoading by remember { mutableStateOf(value = false) }
 
     Scaffold(
         containerColor = SigniaLightLavender

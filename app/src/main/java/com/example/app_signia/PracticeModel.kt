@@ -11,7 +11,7 @@ data class Exercise(
     val categoryTitle: String,   // Título visible ("Módulo: Saludos", "Módulo: Familia")
     val word: String,            // Respuesta correcta
     val imageRes: Int,           // ID del recurso de imagen (0 si no tiene imagen)
-    val options: List<String>    // Alternativas de opción múltiple
+    val options: List<String>,   // Alternativas de opción múltiple
 )
 
 // Objeto singleton con datos simulados

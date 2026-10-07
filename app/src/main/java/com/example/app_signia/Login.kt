@@ -35,7 +35,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Login(navController: NavController) {
     val auth = remember { Firebase.auth }
@@ -43,8 +42,8 @@ fun Login(navController: NavController) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(value = false) }
+    var isLoading by remember { mutableStateOf(value = false) }
 
     // Configuración oficial de Google Sign-In
     val gso = remember {
@@ -56,7 +55,7 @@ fun Login(navController: NavController) {
     val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
 
     val googleLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+        contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {

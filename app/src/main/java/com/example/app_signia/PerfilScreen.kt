@@ -71,7 +71,7 @@ fun PerfilScreen(navController: NavController) {
     }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.GetContent(),
     ) { uri: Uri? ->
         if (uri != null) {
             try {
@@ -82,7 +82,7 @@ fun PerfilScreen(navController: NavController) {
                     profileBitmap = bitmap.asImageBitmap()
                     Toast.makeText(context, "¡Foto de perfil guardada con éxito!", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 Toast.makeText(context, "Error al procesar la imagen", Toast.LENGTH_SHORT).show()
             }
         }
