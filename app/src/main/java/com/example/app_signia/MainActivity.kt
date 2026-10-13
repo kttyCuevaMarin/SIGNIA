@@ -38,11 +38,30 @@ class MainActivity : ComponentActivity() {
                     composable("aprende_lsp") {
                         AprendeLspScreen(navController = navController)
                     }
+
+                    // ==========================================
+                    // NUEVAS RUTAS: RF08 y RF09 (Categorías y Detalle)
+                    // ==========================================
+                    composable(
+                        route = "category_signs/{categoryId}",
+                        arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
+                        CategorySignsScreen(navController = navController, categoryId = categoryId)
+                    }
+
+                    composable(
+                        route = "sign_detail/{wordKey}",
+                        arguments = listOf(navArgument("wordKey") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val wordKey = backStackEntry.arguments?.getString("wordKey") ?: ""
+                        SignDetailScreen(navController = navController, wordKey = wordKey)
+                    }
+                    // ==========================================
+
                     composable("practice") {
                         PracticeScreen(navController = navController, category = "saludos")
                     }
-
-
                     composable(
                         route = "practice/{category}",
                         arguments = listOf(navArgument("category") { type = NavType.StringType })

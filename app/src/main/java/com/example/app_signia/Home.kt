@@ -46,13 +46,30 @@ fun Home(navController: NavController = rememberNavController()) {
     val auth = remember { Firebase.auth }
     val currentUser = auth.currentUser
 
-    // Cargar la racha del usuario desde Firebase
-    LaunchedEffect(currentUser?.uid) {
-        StreakManager.loadStreakForUser(currentUser?.uid)
+    // Obtener nombre dinámico del usuario autenticado (extrae el nombre antes del @ si displayName está vacío)
+    val userName = remember(currentUser) {
+        when {
+            !currentUser?.displayName.isNullOrBlank() -> currentUser?.displayName
+            !currentUser?.email.isNullOrBlank() -> {
+                currentUser?.email?.substringBefore("@")
+                    ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            }
+            else -> "Usuario"
+        }
     }
 
-    val currentProgress = MockProgressData.completedSigns.toFloat() / MockProgressData.totalSigns.toFloat()
+    // Cargar Racha y Progreso real desde Firebase Firestore (RF10 y RF17)
+    LaunchedEffect(currentUser?.uid) {
+        StreakManager.loadStreakForUser(currentUser?.uid)
+        ProgressManager.loadProgressForUser(currentUser?.uid)
+    }
+
+    // Cálculos con datos REALES de ProgressManager
+    val totalSignsCount = 30
+    val completedSigns = ProgressManager.completedSignsCount
+    val currentProgress = (completedSigns.toFloat() / totalSignsCount.toFloat()).coerceIn(0f, 1f)
     val progressPercentage = (currentProgress * 100).toInt()
+    val remainingXp = (650 - (completedSigns * 20)).coerceAtLeast(0)
 
     val modules = listOf(
         SigniaModule(
@@ -223,7 +240,7 @@ fun Home(navController: NavController = rememberNavController()) {
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Tarjeta de progreso dinámico
+            // Tarjeta de progreso dinámico REAL (RF10)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -234,7 +251,7 @@ fun Home(navController: NavController = rememberNavController()) {
                     modifier = Modifier.padding(18.dp)
                 ) {
                     Text(
-                        text = "¡Hola, ${currentUser?.displayName ?: "Ana"}!",
+                        text = "¡Hola, $userName!",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = ThemeManager.textColor
@@ -254,7 +271,7 @@ fun Home(navController: NavController = rememberNavController()) {
                     ) {
                         Column {
                             Text(
-                                text = "${MockProgressData.completedSigns} / ${MockProgressData.totalSigns} señas",
+                                text = "$completedSigns / $totalSignsCount señas",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
                                 color = ThemeManager.textColor
@@ -293,7 +310,7 @@ fun Home(navController: NavController = rememberNavController()) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Faltan ${650 - (MockProgressData.completedSigns * 20)} XP para el siguiente nivel",
+                        text = "Faltan $remainingXp XP para el siguiente nivel",
                         fontSize = 12.sp,
                         color = ThemeManager.subtextColor
                     )

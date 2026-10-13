@@ -31,8 +31,8 @@ data class LearningCategory(
 )
 
 /**
- * PANTALLA DEL MÓDULO EDUCATIVO APRENDE LSP
- * Utiliza los colores corporativos oficiales de SIGNIA (Púrpura, Lavanda y Azul)
+ * PANTALLA DEL MÓDULO EDUCATIVO APRENDE LSP (RF08)
+ * Permite seleccionar una categoría para ir a su lista de señas.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,7 +115,6 @@ fun AprendeLspScreen(navController: NavController) {
                 .padding(horizontal = 20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Título principal
             Text(
                 text = "¿Qué quieres aprender hoy?",
                 fontSize = 24.sp,
@@ -134,7 +133,6 @@ fun AprendeLspScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Tarjeta de Progreso Total (15%) con paleta púrpura y azul
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
@@ -194,7 +192,6 @@ fun AprendeLspScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Título de Sección
             Text(
                 text = "MÓDULOS DE APRENDIZAJE",
                 fontSize = 12.sp,
@@ -205,7 +202,6 @@ fun AprendeLspScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Lista de Módulos
             categories.forEach { category ->
                 val progressFraction = if (category.totalCount > 0) {
                     category.completedCount.toFloat() / category.totalCount.toFloat()
@@ -216,7 +212,8 @@ fun AprendeLspScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
                         .clickable {
-                            navController.navigate("practice/${category.id}")
+                            // RF08: Navega a la lista de señas de la categoría
+                            navController.navigate("category_signs/${category.id}")
                         },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),

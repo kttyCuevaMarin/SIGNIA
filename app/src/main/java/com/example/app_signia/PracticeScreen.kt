@@ -24,8 +24,8 @@ import com.google.firebase.auth.auth
 
 /**
  * PANTALLA DE PRÁCTICA/EJERCICIOS POR CATEGORÍA
- * Carga el ejercicio específico correspondiente a la categoría seleccionada,
- * actualiza la racha de aprendizaje (RF17) y utiliza la paleta oficial de SIGNIA.
+ * Carga el ejercicio específico, guarda el progreso real en Firestore (RF10)
+ * y actualiza la racha de aprendizaje (RF17).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +43,11 @@ fun PracticeScreen(
     var selectedOption by remember { mutableStateOf("") }
     var isAnswered by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Cargar el progreso previo del usuario al entrar a la pantalla
+    LaunchedEffect(currentUser?.uid) {
+        ProgressManager.loadProgressForUser(currentUser?.uid)
+    }
 
     Scaffold(
         containerColor = ThemeManager.backgroundColor,
@@ -84,7 +89,7 @@ fun PracticeScreen(
                 color = ThemeManager.textColor
             )
 
-            // Mostrar la imagen del ejercicio (si existe) o un contenedor ilustrativo
+            // Ilustración/Imagen del ejercicio
             if (exercise.imageRes != 0) {
                 Card(
                     shape = RoundedCornerShape(20.dp),
@@ -177,19 +182,18 @@ fun PracticeScreen(
                 }
             }
 
-            // Botón de Confirmación
+            // Botón de Confirmación y Persistencia en la Nube (RF10)
             Button(
                 onClick = {
-                    if (selectedOption == exercise.word) {
-                        if (MockProgressData.completedSigns < MockProgressData.totalSigns) {
-                            MockProgressData.completedSigns += 1
-                        }
+                    if (selectedOption.equals(exercise.word, ignoreCase = true)) {
+                        // 1. Guardar y sincronizar progreso en Firebase Firestore (RF10)
+                        ProgressManager.markSignCompleted(currentUser?.uid, exercise.word)
 
-                        // Actualizar la racha de aprendizaje (RF17) asociada a la cuenta del usuario
+                        // 2. Actualizar racha de aprendizaje (RF17)
                         StreakManager.recordLessonCompleted(currentUser?.uid) { nuevaRacha ->
                             Toast.makeText(
                                 context,
-                                "¡Correcto! Racha actual: $nuevaRacha días 🔥",
+                                "¡Correcto! Progreso guardado y racha actual: $nuevaRacha días 🔥",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
