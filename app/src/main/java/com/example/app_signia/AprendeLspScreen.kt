@@ -91,7 +91,7 @@ fun AprendeLspScreen(navController: NavController) {
     )
 
     Scaffold(
-        containerColor = SigniaLightLavender,
+        containerColor = ThemeManager.backgroundColor,
         topBar = {
             TopAppBar(
                 title = { },
@@ -100,11 +100,11 @@ fun AprendeLspScreen(navController: NavController) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = SigniaDarkPurple
+                            tint = ThemeManager.textColor
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeManager.topBarColor)
             )
         }
     ) { paddingValues ->
@@ -120,7 +120,7 @@ fun AprendeLspScreen(navController: NavController) {
                 text = "¿Qué quieres aprender hoy?",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = SigniaDarkPurple
+                color = ThemeManager.textColor
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -128,7 +128,7 @@ fun AprendeLspScreen(navController: NavController) {
             Text(
                 text = "Continúa tu progreso en Lengua de Señas Peruana.",
                 fontSize = 14.sp,
-                color = SigniaDarkPurple.copy(alpha = 0.8f),
+                color = ThemeManager.subtextColor,
                 lineHeight = 20.sp
             )
 
@@ -138,7 +138,7 @@ fun AprendeLspScreen(navController: NavController) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = SigniaDarkPurple),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.heroCardColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
@@ -199,7 +199,7 @@ fun AprendeLspScreen(navController: NavController) {
                 text = "MÓDULOS DE APRENDIZAJE",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = SigniaDarkPurple,
+                color = ThemeManager.textColor,
                 letterSpacing = 0.8.sp
             )
 
@@ -219,7 +219,7 @@ fun AprendeLspScreen(navController: NavController) {
                             navController.navigate("practice/${category.id}")
                         },
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Row(
@@ -230,7 +230,7 @@ fun AprendeLspScreen(navController: NavController) {
                     ) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = category.iconBoxColor,
+                            color = if (ThemeManager.isDarkMode) ThemeManager.inputBackgroundColor else category.iconBoxColor,
                             modifier = Modifier.size(48.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -257,14 +257,14 @@ fun AprendeLspScreen(navController: NavController) {
                                     text = category.title,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
-                                    color = SigniaDarkPurple
+                                    color = ThemeManager.textColor
                                 )
 
                                 Text(
                                     text = "${category.completedCount}/${category.totalCount}",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (category.completedCount == category.totalCount) SigniaBluePrimary else SigniaDarkPurple.copy(alpha = 0.7f)
+                                    color = if (category.completedCount == category.totalCount) SigniaBluePrimary else ThemeManager.subtextColor
                                 )
                             }
 
@@ -276,7 +276,7 @@ fun AprendeLspScreen(navController: NavController) {
                                     .fillMaxWidth()
                                     .height(6.dp),
                                 color = SigniaBluePrimary,
-                                trackColor = SigniaLightLavender
+                                trackColor = if (ThemeManager.isDarkMode) ThemeManager.inputBackgroundColor else SigniaLightLavender
                             )
                         }
 
@@ -285,7 +285,7 @@ fun AprendeLspScreen(navController: NavController) {
                         Icon(
                             imageVector = Icons.Default.ChevronRight,
                             contentDescription = "Ir",
-                            tint = SigniaDarkPurple.copy(alpha = 0.6f),
+                            tint = ThemeManager.subtextColor,
                             modifier = Modifier.size(20.dp)
                         )
                     }

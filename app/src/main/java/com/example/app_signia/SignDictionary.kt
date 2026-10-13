@@ -33,7 +33,7 @@ object SignDictionary {
             displayWord = "Hola",
             category = "Saludos",
             description = "Mano abierta a la altura de la sien, realizando un movimiento suave hacia afuera en arco.",
-            imageRes = R.drawable.hola,
+            videoRes = R.raw.hola,
             gestureSteps = listOf(
                 "1. Elevar la mano abierta a la altura de la sien",
                 "2. Mover la palma suavemente hacia afuera",

@@ -43,7 +43,7 @@ fun RegisterView(navController: NavController) {
     var isLoading by remember { mutableStateOf(value = false) }
 
     Scaffold(
-        containerColor = SigniaLightLavender
+        containerColor = ThemeManager.backgroundColor
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -67,13 +67,13 @@ fun RegisterView(navController: NavController) {
                 text = "Crear Cuenta",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = SigniaDarkPurple
+                color = ThemeManager.textColor
             )
 
             Text(
                 text = "Conectando mundos a través de señas.",
                 fontSize = 14.sp,
-                color = SigniaDarkPurple.copy(alpha = 0.8f),
+                color = ThemeManager.subtextColor,
                 modifier = Modifier.padding(top = 4.dp)
             )
 
@@ -85,7 +85,7 @@ fun RegisterView(navController: NavController) {
                     text = "Nombre completo",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -93,20 +93,20 @@ fun RegisterView(navController: NavController) {
                     value = fullName,
                     onValueChange = { fullName = it },
                     placeholder = {
-                        Text("Ej. Ana García", color = Color.Gray)
+                        Text("Ej. Ana García", color = ThemeManager.subtextColor)
                     },
                     leadingIcon = {
-                        Icon(Icons.Default.Person, contentDescription = null, tint = SigniaDarkPurple)
+                        Icon(Icons.Default.Person, contentDescription = null, tint = ThemeManager.textColor)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = ThemeManager.cardBackgroundColor,
+                        unfocusedContainerColor = ThemeManager.cardBackgroundColor,
                         focusedBorderColor = SigniaBluePrimary,
                         unfocusedBorderColor = SigniaSoftLilac,
-                        focusedTextColor = SigniaDarkPurple,
-                        unfocusedTextColor = SigniaDarkPurple,
+                        focusedTextColor = ThemeManager.textColor,
+                        unfocusedTextColor = ThemeManager.textColor,
                         cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true
@@ -121,27 +121,27 @@ fun RegisterView(navController: NavController) {
                     text = "Correo electrónico",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     placeholder = {
-                        Text("correo@ejemplo.com", color = Color.Gray)
+                        Text("correo@ejemplo.com", color = ThemeManager.subtextColor)
                     },
                     leadingIcon = {
-                        Icon(Icons.Default.Email, contentDescription = null, tint = SigniaDarkPurple)
+                        Icon(Icons.Default.Email, contentDescription = null, tint = ThemeManager.textColor)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = ThemeManager.cardBackgroundColor,
+                        unfocusedContainerColor = ThemeManager.cardBackgroundColor,
                         focusedBorderColor = SigniaBluePrimary,
                         unfocusedBorderColor = SigniaSoftLilac,
-                        focusedTextColor = SigniaDarkPurple,
-                        unfocusedTextColor = SigniaDarkPurple,
+                        focusedTextColor = ThemeManager.textColor,
+                        unfocusedTextColor = ThemeManager.textColor,
                         cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true,
@@ -157,24 +157,24 @@ fun RegisterView(navController: NavController) {
                     text = "Contraseña",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     placeholder = {
-                        Text("Mínimo 8 caracteres", color = Color.Gray)
+                        Text("Mínimo 8 caracteres", color = ThemeManager.subtextColor)
                     },
                     leadingIcon = {
-                        Icon(Icons.Default.Lock, contentDescription = null, tint = SigniaDarkPurple)
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = ThemeManager.textColor)
                     },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                 contentDescription = null,
-                                tint = SigniaDarkPurple.copy(alpha = 0.6f)
+                                tint = ThemeManager.subtextColor
                             )
                         }
                     },
@@ -182,12 +182,12 @@ fun RegisterView(navController: NavController) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = ThemeManager.cardBackgroundColor,
+                        unfocusedContainerColor = ThemeManager.cardBackgroundColor,
                         focusedBorderColor = SigniaBluePrimary,
                         unfocusedBorderColor = SigniaSoftLilac,
-                        focusedTextColor = SigniaDarkPurple,
-                        unfocusedTextColor = SigniaDarkPurple,
+                        focusedTextColor = ThemeManager.textColor,
+                        unfocusedTextColor = ThemeManager.textColor,
                         cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true
@@ -202,24 +202,24 @@ fun RegisterView(navController: NavController) {
                     text = "Confirmar contraseña",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
                     placeholder = {
-                        Text("Repite tu contraseña", color = Color.Gray)
+                        Text("Repite tu contraseña", color = ThemeManager.subtextColor)
                     },
                     leadingIcon = {
-                        Icon(Icons.Default.Lock, contentDescription = null, tint = SigniaDarkPurple)
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = ThemeManager.textColor)
                     },
                     trailingIcon = {
                         IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                             Icon(
                                 imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                 contentDescription = null,
-                                tint = SigniaDarkPurple.copy(alpha = 0.6f)
+                                tint = ThemeManager.subtextColor
                             )
                         }
                     },
@@ -227,12 +227,12 @@ fun RegisterView(navController: NavController) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = ThemeManager.cardBackgroundColor,
+                        unfocusedContainerColor = ThemeManager.cardBackgroundColor,
                         focusedBorderColor = SigniaBluePrimary,
                         unfocusedBorderColor = SigniaSoftLilac,
-                        focusedTextColor = SigniaDarkPurple,
-                        unfocusedTextColor = SigniaDarkPurple,
+                        focusedTextColor = ThemeManager.textColor,
+                        unfocusedTextColor = ThemeManager.textColor,
                         cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true
@@ -251,13 +251,13 @@ fun RegisterView(navController: NavController) {
                     onCheckedChange = { termsAccepted = it },
                     colors = CheckboxDefaults.colors(
                         checkedColor = SigniaBluePrimary,
-                        uncheckedColor = SigniaDarkPurple
+                        uncheckedColor = ThemeManager.textColor
                     )
                 )
                 Text(
                     text = "Acepto los términos y condiciones de uso.",
                     fontSize = 12.sp,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
             }
 
@@ -296,7 +296,7 @@ fun RegisterView(navController: NavController) {
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SigniaDarkPurple),
+                colors = ButtonDefaults.buttonColors(containerColor = ThemeManager.heroCardColor),
                 enabled = !isLoading
             ) {
                 if (isLoading) {
@@ -321,7 +321,7 @@ fun RegisterView(navController: NavController) {
                 Text(
                     text = "¿Ya tienes cuenta? ",
                     fontSize = 14.sp,
-                    color = SigniaDarkPurple.copy(alpha = 0.8f)
+                    color = ThemeManager.subtextColor
                 )
                 TextButton(
                     onClick = { navController.navigate("login") },

@@ -87,7 +87,7 @@ fun Login(navController: NavController) {
     }
 
     Scaffold(
-        containerColor = SigniaLightLavender
+        containerColor = ThemeManager.backgroundColor
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -110,7 +110,7 @@ fun Login(navController: NavController) {
                 text = "SIGNIA",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = SigniaDarkPurple,
+                color = ThemeManager.textColor,
                 letterSpacing = 1.sp
             )
 
@@ -118,7 +118,7 @@ fun Login(navController: NavController) {
                 text = "Conectando comunidades a través de\nla lengua de señas.",
                 textAlign = TextAlign.Center,
                 fontSize = 15.sp,
-                color = SigniaDarkPurple.copy(alpha = 0.8f),
+                color = ThemeManager.subtextColor,
                 lineHeight = 22.sp,
                 modifier = Modifier.padding(top = 6.dp)
             )
@@ -131,7 +131,7 @@ fun Login(navController: NavController) {
                     text = "Correo electrónico",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
@@ -140,25 +140,25 @@ fun Login(navController: NavController) {
                     placeholder = {
                         Text(
                             "ejemplo@correo.com",
-                            color = Color.Gray
+                            color = ThemeManager.subtextColor
                         )
                     },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Email,
                             contentDescription = null,
-                            tint = SigniaDarkPurple
+                            tint = ThemeManager.textColor
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = ThemeManager.cardBackgroundColor,
+                        unfocusedContainerColor = ThemeManager.cardBackgroundColor,
                         focusedBorderColor = SigniaBluePrimary,
                         unfocusedBorderColor = SigniaSoftLilac,
-                        focusedTextColor = SigniaDarkPurple,
-                        unfocusedTextColor = SigniaDarkPurple,
+                        focusedTextColor = ThemeManager.textColor,
+                        unfocusedTextColor = ThemeManager.textColor,
                         cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true,
@@ -179,7 +179,7 @@ fun Login(navController: NavController) {
                         text = "Contraseña",
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = SigniaDarkPurple
+                        color = ThemeManager.textColor
                     )
                     TextButton(
                         onClick = { navController.navigate("forgot_password") },
@@ -199,14 +199,14 @@ fun Login(navController: NavController) {
                     placeholder = {
                         Text(
                             "Ingresa tu contraseña",
-                            color = Color.Gray
+                            color = ThemeManager.subtextColor
                         )
                     },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Lock,
                             contentDescription = null,
-                            tint = SigniaDarkPurple
+                            tint = ThemeManager.textColor
                         )
                     },
                     trailingIcon = {
@@ -214,7 +214,7 @@ fun Login(navController: NavController) {
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                 contentDescription = null,
-                                tint = SigniaDarkPurple.copy(alpha = 0.6f)
+                                tint = ThemeManager.subtextColor
                             )
                         }
                     },
@@ -222,12 +222,12 @@ fun Login(navController: NavController) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = ThemeManager.cardBackgroundColor,
+                        unfocusedContainerColor = ThemeManager.cardBackgroundColor,
                         focusedBorderColor = SigniaBluePrimary,
                         unfocusedBorderColor = SigniaSoftLilac,
-                        focusedTextColor = SigniaDarkPurple,
-                        unfocusedTextColor = SigniaDarkPurple,
+                        focusedTextColor = ThemeManager.textColor,
+                        unfocusedTextColor = ThemeManager.textColor,
                         cursorColor = SigniaBluePrimary
                     ),
                     singleLine = true
@@ -260,7 +260,7 @@ fun Login(navController: NavController) {
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SigniaDarkPurple),
+                colors = ButtonDefaults.buttonColors(containerColor = ThemeManager.heroCardColor),
                 enabled = !isLoading
             ) {
                 if (isLoading) {
@@ -286,7 +286,7 @@ fun Login(navController: NavController) {
                 Text(
                     text = " O continúa con ",
                     fontSize = 12.sp,
-                    color = SigniaDarkPurple.copy(alpha = 0.7f),
+                    color = ThemeManager.subtextColor,
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
                 HorizontalDivider(modifier = Modifier.weight(1f), color = SigniaSoftLilac)
@@ -307,7 +307,7 @@ fun Login(navController: NavController) {
                     .height(50.dp),
                 shape = RoundedCornerShape(14.dp),
                 border = BorderStroke(1.dp, SigniaSoftLilac),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = ThemeManager.cardBackgroundColor)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -318,7 +318,7 @@ fun Login(navController: NavController) {
                     )
                     Text(
                         "Continuar con Google",
-                        color = SigniaDarkPurple,
+                        color = ThemeManager.textColor,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
@@ -355,7 +355,7 @@ fun Login(navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 32.dp)
             ) {
-                Text(text = "¿Nuevo en SIGNIA? ", fontSize = 14.sp, color = SigniaDarkPurple.copy(alpha = 0.8f))
+                Text(text = "¿Nuevo en SIGNIA? ", fontSize = 14.sp, color = ThemeManager.subtextColor)
                 TextButton(
                     onClick = { navController.navigate("register") },
                     contentPadding = PaddingValues(0.dp)

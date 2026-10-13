@@ -54,50 +54,48 @@ fun Home(navController: NavController = rememberNavController()) {
     val currentProgress = MockProgressData.completedSigns.toFloat() / MockProgressData.totalSigns.toFloat()
     val progressPercentage = (currentProgress * 100).toInt()
 
-    val modules = remember {
-        listOf(
-            SigniaModule(
-                title = "Reconocimiento de Señas",
-                description = "Usa la cámara para traducir LSP a texto y reproducción de voz en tiempo real.",
-                icon = Icons.Default.CameraAlt,
-                route = "practice",
-                cardBgColor = SigniaDarkPurple,
-                textColor = Color.White,
-                badgeText = "IA"
-            ),
-            SigniaModule(
-                title = "Voz/Texto a LSP",
-                description = "Escribe o habla para generar animaciones tridimensionales de las señas correspondientes.",
-                icon = Icons.Default.RecordVoiceOver,
-                route = "translator",
-                cardBgColor = SigniaSoftLilac,
-                textColor = SigniaDarkPurple
-            ),
-            SigniaModule(
-                title = "Aprende LSP",
-                description = "Módulo educativo organizado por categorías: Saludos, familia, números y más.",
-                icon = Icons.Default.School,
-                route = "aprende_lsp",
-                cardBgColor = SigniaDarkPurple,
-                textColor = Color.White,
-                badgeText = "Educativo"
-            ),
-            SigniaModule(
-                title = "Guía de Uso",
-                description = "Manual interactivo para aprender a posicionar las manos y optimizar la traducción.",
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                route = "translator",
-                cardBgColor = SigniaSoftLilac,
-                textColor = SigniaDarkPurple
-            )
+    val modules = listOf(
+        SigniaModule(
+            title = "Reconocimiento de Señas",
+            description = "Usa la cámara para traducir LSP a texto y reproducción de voz en tiempo real.",
+            icon = Icons.Default.CameraAlt,
+            route = "practice",
+            cardBgColor = ThemeManager.heroCardColor,
+            textColor = Color.White,
+            badgeText = "IA"
+        ),
+        SigniaModule(
+            title = "Traducción lenguaje de señas",
+            description = "Escribe o habla para generar animaciones tridimensionales de las señas correspondientes.",
+            icon = Icons.Default.RecordVoiceOver,
+            route = "translator",
+            cardBgColor = ThemeManager.cardBackgroundColor,
+            textColor = ThemeManager.textColor
+        ),
+        SigniaModule(
+            title = "Aprende LSP",
+            description = "Módulo educativo organizado por categorías: Saludos, familia, números y más.",
+            icon = Icons.Default.School,
+            route = "aprende_lsp",
+            cardBgColor = ThemeManager.heroCardColor,
+            textColor = Color.White,
+            badgeText = "Educativo"
+        ),
+        SigniaModule(
+            title = "Guía de Uso",
+            description = "Manual interactivo para aprender a posicionar las manos y optimizar la traducción.",
+            icon = Icons.AutoMirrored.Filled.MenuBook,
+            route = "translator",
+            cardBgColor = ThemeManager.cardBackgroundColor,
+            textColor = ThemeManager.textColor
         )
-    }
+    )
 
     Scaffold(
-        containerColor = SigniaLightLavender,
+        containerColor = ThemeManager.backgroundColor,
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeManager.topBarColor),
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -111,7 +109,7 @@ fun Home(navController: NavController = rememberNavController()) {
                         Text(
                             text = "SIGNIA",
                             fontWeight = FontWeight.ExtraBold,
-                            color = SigniaDarkPurple,
+                            color = ThemeManager.textColor,
                             letterSpacing = 1.sp,
                             fontSize = 20.sp
                         )
@@ -121,7 +119,10 @@ fun Home(navController: NavController = rememberNavController()) {
                     // Badge interactivo de Racha (RF17)
                     Row(
                         modifier = Modifier
-                            .background(SigniaSoftLilac.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                            .background(
+                                if (ThemeManager.isDarkMode) ThemeManager.inputBackgroundColor else SigniaSoftLilac.copy(alpha = 0.5f),
+                                RoundedCornerShape(16.dp)
+                            )
                             .clickable { navController.navigate("racha") }
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -137,7 +138,7 @@ fun Home(navController: NavController = rememberNavController()) {
                             text = "${StreakManager.currentStreak} Días",
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
-                            color = SigniaDarkPurple
+                            color = ThemeManager.textColor
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -146,7 +147,7 @@ fun Home(navController: NavController = rememberNavController()) {
         },
         bottomBar = {
             NavigationBar(
-                containerColor = SigniaLightLavender,
+                containerColor = ThemeManager.bottomBarColor,
                 tonalElevation = 0.dp
             ) {
                 NavigationBarItem(
@@ -155,11 +156,11 @@ fun Home(navController: NavController = rememberNavController()) {
                     selected = selectedItem == 0,
                     onClick = { selectedItem = 0 },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SigniaDarkPurple,
-                        selectedTextColor = SigniaDarkPurple,
-                        indicatorColor = SigniaSoftLilac.copy(alpha = 0.6f),
-                        unselectedIconColor = SigniaDarkPurple.copy(alpha = 0.7f),
-                        unselectedTextColor = SigniaDarkPurple.copy(alpha = 0.7f)
+                        selectedIconColor = SigniaBluePrimary,
+                        selectedTextColor = SigniaBluePrimary,
+                        indicatorColor = SigniaSoftLilac.copy(alpha = 0.4f),
+                        unselectedIconColor = ThemeManager.subtextColor,
+                        unselectedTextColor = ThemeManager.subtextColor
                     )
                 )
                 NavigationBarItem(
@@ -173,9 +174,9 @@ fun Home(navController: NavController = rememberNavController()) {
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = SigniaBluePrimary,
                         selectedTextColor = SigniaBluePrimary,
-                        indicatorColor = SigniaSoftLilac.copy(alpha = 0.6f),
-                        unselectedIconColor = SigniaDarkPurple.copy(alpha = 0.7f),
-                        unselectedTextColor = SigniaDarkPurple.copy(alpha = 0.7f)
+                        indicatorColor = SigniaSoftLilac.copy(alpha = 0.4f),
+                        unselectedIconColor = ThemeManager.subtextColor,
+                        unselectedTextColor = ThemeManager.subtextColor
                     )
                 )
                 NavigationBarItem(
@@ -189,9 +190,9 @@ fun Home(navController: NavController = rememberNavController()) {
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = SigniaBluePrimary,
                         selectedTextColor = SigniaBluePrimary,
-                        indicatorColor = SigniaSoftLilac.copy(alpha = 0.6f),
-                        unselectedIconColor = SigniaDarkPurple.copy(alpha = 0.7f),
-                        unselectedTextColor = SigniaDarkPurple.copy(alpha = 0.7f)
+                        indicatorColor = SigniaSoftLilac.copy(alpha = 0.4f),
+                        unselectedIconColor = ThemeManager.subtextColor,
+                        unselectedTextColor = ThemeManager.subtextColor
                     )
                 )
                 NavigationBarItem(
@@ -203,11 +204,11 @@ fun Home(navController: NavController = rememberNavController()) {
                         navController.navigate("perfil")
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SigniaDarkPurple,
-                        selectedTextColor = SigniaDarkPurple,
-                        indicatorColor = SigniaSoftLilac.copy(alpha = 0.6f),
-                        unselectedIconColor = SigniaDarkPurple.copy(alpha = 0.7f),
-                        unselectedTextColor = SigniaDarkPurple.copy(alpha = 0.7f)
+                        selectedIconColor = SigniaBluePrimary,
+                        selectedTextColor = SigniaBluePrimary,
+                        indicatorColor = SigniaSoftLilac.copy(alpha = 0.4f),
+                        unselectedIconColor = ThemeManager.subtextColor,
+                        unselectedTextColor = ThemeManager.subtextColor
                     )
                 )
             }
@@ -226,7 +227,7 @@ fun Home(navController: NavController = rememberNavController()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -236,12 +237,12 @@ fun Home(navController: NavController = rememberNavController()) {
                         text = "¡Hola, ${currentUser?.displayName ?: "Ana"}!",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = SigniaDarkPurple
+                        color = ThemeManager.textColor
                     )
                     Text(
                         text = "Tu progreso de hoy",
                         fontSize = 14.sp,
-                        color = Color.Gray,
+                        color = ThemeManager.subtextColor,
                         modifier = Modifier.padding(vertical = 2.dp)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -256,12 +257,12 @@ fun Home(navController: NavController = rememberNavController()) {
                                 text = "${MockProgressData.completedSigns} / ${MockProgressData.totalSigns} señas",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
-                                color = SigniaDarkPurple
+                                color = ThemeManager.textColor
                             )
                             Text(
                                 text = "Nivel básico completado al $progressPercentage%",
                                 fontSize = 12.sp,
-                                color = Color.Gray
+                                color = ThemeManager.subtextColor
                             )
                         }
                         Surface(
@@ -288,13 +289,13 @@ fun Home(navController: NavController = rememberNavController()) {
                             .fillMaxWidth()
                             .height(8.dp),
                         color = SigniaBluePrimary,
-                        trackColor = SigniaLightLavender
+                        trackColor = if (ThemeManager.isDarkMode) ThemeManager.inputBackgroundColor else SigniaLightLavender
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Faltan ${650 - (MockProgressData.completedSigns * 20)} XP para el siguiente nivel",
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = ThemeManager.subtextColor
                     )
                 }
             }
@@ -305,7 +306,7 @@ fun Home(navController: NavController = rememberNavController()) {
                 text = "Funciones principales",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = SigniaDarkPurple,
+                color = ThemeManager.textColor,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 

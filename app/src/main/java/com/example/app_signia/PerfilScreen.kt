@@ -89,14 +89,14 @@ fun PerfilScreen(navController: NavController) {
     }
 
     Scaffold(
-        containerColor = SigniaLightLavender,
+        containerColor = ThemeManager.backgroundColor,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = "Mi Perfil",
                         fontWeight = FontWeight.Bold,
-                        color = SigniaDarkPurple,
+                        color = ThemeManager.textColor,
                         fontSize = 18.sp
                     )
                 },
@@ -105,11 +105,11 @@ fun PerfilScreen(navController: NavController) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = SigniaDarkPurple
+                            tint = ThemeManager.textColor
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeManager.topBarColor)
             )
         }
     ) { paddingValues ->
@@ -131,7 +131,7 @@ fun PerfilScreen(navController: NavController) {
                 Surface(
                     modifier = Modifier.size(120.dp),
                     shape = CircleShape,
-                    color = Color.White,
+                    color = ThemeManager.cardBackgroundColor,
                     shadowElevation = 4.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -149,7 +149,7 @@ fun PerfilScreen(navController: NavController) {
                                 imageVector = Icons.Default.Person,
                                 contentDescription = "Icono por defecto",
                                 modifier = Modifier.size(70.dp),
-                                tint = SigniaDarkPurple
+                                tint = ThemeManager.textColor
                             )
                         }
                     }
@@ -177,7 +177,7 @@ fun PerfilScreen(navController: NavController) {
                 text = nombreUsuario,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = SigniaDarkPurple,
+                color = ThemeManager.textColor,
                 textAlign = TextAlign.Center
             )
 
@@ -185,7 +185,7 @@ fun PerfilScreen(navController: NavController) {
             Text(
                 text = correoUsuario,
                 fontSize = 14.sp,
-                color = SigniaDarkPurple.copy(alpha = 0.7f),
+                color = ThemeManager.subtextColor,
                 textAlign = TextAlign.Center
             )
 
@@ -195,7 +195,7 @@ fun PerfilScreen(navController: NavController) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -205,7 +205,7 @@ fun PerfilScreen(navController: NavController) {
                         text = "Resumen de Cuenta",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = SigniaDarkPurple
+                        color = ThemeManager.textColor
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -218,19 +218,19 @@ fun PerfilScreen(navController: NavController) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.School, contentDescription = null, tint = SigniaBluePrimary)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Señas Aprendidas", fontSize = 14.sp, color = SigniaDarkPurple)
+                            Text("Señas Aprendidas", fontSize = 14.sp, color = ThemeManager.textColor)
                         }
                         Text(
                             text = "${MockProgressData.completedSigns} / ${MockProgressData.totalSigns}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
-                            color = SigniaDarkPurple
+                            color = ThemeManager.textColor
                         )
                     }
 
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 10.dp),
-                        color = SigniaLightLavender
+                        color = if (ThemeManager.isDarkMode) ThemeManager.inputBackgroundColor else SigniaLightLavender
                     )
 
                     // Fila de Racha interactiva
@@ -244,20 +244,20 @@ fun PerfilScreen(navController: NavController) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = SigniaBluePrimary)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Racha Actual", fontSize = 14.sp, color = SigniaDarkPurple)
+                            Text("Racha Actual", fontSize = 14.sp, color = ThemeManager.textColor)
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = "${StreakManager.currentStreak} Días",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
-                                color = SigniaDarkPurple
+                                color = ThemeManager.textColor
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Icon(
                                 imageVector = Icons.Default.ChevronRight,
                                 contentDescription = "Ver racha",
-                                tint = SigniaDarkPurple.copy(alpha = 0.6f),
+                                tint = ThemeManager.subtextColor,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -265,7 +265,7 @@ fun PerfilScreen(navController: NavController) {
 
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 10.dp),
-                        color = SigniaLightLavender
+                        color = if (ThemeManager.isDarkMode) ThemeManager.inputBackgroundColor else SigniaLightLavender
                     )
 
                     Row(
@@ -276,19 +276,92 @@ fun PerfilScreen(navController: NavController) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Star, contentDescription = null, tint = SigniaBluePrimary)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Nivel", fontSize = 14.sp, color = SigniaDarkPurple)
+                            Text("Nivel", fontSize = 14.sp, color = ThemeManager.textColor)
                         }
                         Text(
                             text = "Principiante",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
-                            color = SigniaDarkPurple
+                            color = ThemeManager.textColor
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // =================================================================
+            // TARJETA DE APARIENCIA (MODO OSCURO / MODO CLARO)
+            // =================================================================
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Apariencia",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = ThemeManager.textColor
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { ThemeManager.isDarkMode = !ThemeManager.isDarkMode },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (ThemeManager.isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                                contentDescription = "Modo de apariencia",
+                                tint = SigniaBluePrimary
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = if (ThemeManager.isDarkMode) "Modo Oscuro" else "Modo Claro",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = ThemeManager.textColor
+                                )
+                                Text(
+                                    text = if (ThemeManager.isDarkMode) "Activo (Toca para cambiar a claro)" else "Activo (Toca para cambiar a oscuro)",
+                                    fontSize = 12.sp,
+                                    color = ThemeManager.subtextColor
+                                )
+                            }
+                        }
+
+                        Switch(
+                            checked = ThemeManager.isDarkMode,
+                            onCheckedChange = { ThemeManager.isDarkMode = it },
+                            thumbContent = {
+                                Icon(
+                                    imageVector = if (ThemeManager.isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = SigniaBluePrimary,
+                                uncheckedThumbColor = SigniaDarkPurple,
+                                uncheckedTrackColor = SigniaLightLavender
+                            )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Botón Cargar Foto de Perfil
             OutlinedButton(
@@ -298,11 +371,11 @@ fun PerfilScreen(navController: NavController) {
                     .height(50.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = SigniaDarkPurple
+                    containerColor = ThemeManager.cardBackgroundColor,
+                    contentColor = ThemeManager.textColor
                 )
             ) {
-                Icon(Icons.Default.PhotoCamera, contentDescription = null, tint = SigniaDarkPurple)
+                Icon(Icons.Default.PhotoCamera, contentDescription = null, tint = ThemeManager.textColor)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Cargar Foto de Perfil", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }

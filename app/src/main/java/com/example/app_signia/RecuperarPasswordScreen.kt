@@ -77,19 +77,19 @@ fun RecuperarPasswordScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Recuperar Contraseña", fontWeight = FontWeight.Bold, color = SigniaDarkPurple) },
+                title = { Text("Recuperar Contraseña", fontWeight = FontWeight.Bold, color = ThemeManager.textColor) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = SigniaDarkPurple)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = ThemeManager.textColor)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = SigniaLightLavender,
-                    titleContentColor = SigniaDarkPurple
+                    containerColor = ThemeManager.topBarColor,
+                    titleContentColor = ThemeManager.textColor
                 )
             )
         },
-        containerColor = SigniaLightLavender
+        containerColor = ThemeManager.backgroundColor
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -113,13 +113,13 @@ fun RecuperarPasswordScreen(navController: NavController) {
                 text = "¿Olvidaste tu contraseña?",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = SigniaDarkPurple
+                color = ThemeManager.textColor
             )
 
             Text(
                 text = "Ingresa tu correo electrónico registrado y te enviaremos un enlace oficial para restablecer tu contraseña de forma segura.",
                 fontSize = 14.sp,
-                color = SigniaDarkPurple.copy(alpha = 0.8f),
+                color = ThemeManager.subtextColor,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 10.dp, bottom = 32.dp)
             )
@@ -127,20 +127,20 @@ fun RecuperarPasswordScreen(navController: NavController) {
             OutlinedTextField(
                 value = correoUsuario,
                 onValueChange = { correoUsuario = it },
-                label = { Text("Correo electrónico") },
-                placeholder = { Text("ejemplo@correo.com", color = Color.Gray) },
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = SigniaDarkPurple) },
+                label = { Text("Correo electrónico", color = ThemeManager.subtextColor) },
+                placeholder = { Text("ejemplo@correo.com", color = ThemeManager.subtextColor) },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = ThemeManager.textColor) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
+                    focusedContainerColor = ThemeManager.cardBackgroundColor,
+                    unfocusedContainerColor = ThemeManager.cardBackgroundColor,
                     focusedBorderColor = SigniaBluePrimary,
                     unfocusedBorderColor = SigniaSoftLilac,
-                    focusedTextColor = SigniaDarkPurple,
-                    unfocusedTextColor = SigniaDarkPurple,
+                    focusedTextColor = ThemeManager.textColor,
+                    unfocusedTextColor = ThemeManager.textColor,
                     cursorColor = SigniaBluePrimary
                 )
             )
@@ -153,7 +153,7 @@ fun RecuperarPasswordScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SigniaDarkPurple),
+                colors = ButtonDefaults.buttonColors(containerColor = ThemeManager.heroCardColor),
                 enabled = !cargando
             ) {
                 if (cargando) {

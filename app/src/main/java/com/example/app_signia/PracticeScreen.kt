@@ -45,7 +45,7 @@ fun PracticeScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
-        containerColor = SigniaLightLavender,
+        containerColor = ThemeManager.backgroundColor,
         topBar = {
             TopAppBar(
                 title = {
@@ -53,7 +53,7 @@ fun PracticeScreen(
                         text = exercise.categoryTitle,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = SigniaDarkPurple
+                        color = ThemeManager.textColor
                     )
                 },
                 navigationIcon = {
@@ -61,11 +61,11 @@ fun PracticeScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = SigniaDarkPurple
+                            tint = ThemeManager.textColor
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeManager.topBarColor)
             )
         }
     ) { paddingValues ->
@@ -81,14 +81,14 @@ fun PracticeScreen(
                 text = "Relaciona la seña con la palabra correcta:",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = SigniaDarkPurple
+                color = ThemeManager.textColor
             )
 
             // Mostrar la imagen del ejercicio (si existe) o un contenedor ilustrativo
             if (exercise.imageRes != 0) {
                 Card(
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Image(
@@ -105,7 +105,7 @@ fun PracticeScreen(
                         .size(200.dp)
                         .padding(8.dp),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Box(
@@ -124,7 +124,7 @@ fun PracticeScreen(
                                 text = exercise.word,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
-                                color = SigniaDarkPurple
+                                color = ThemeManager.textColor
                             )
                         }
                     }
@@ -150,8 +150,8 @@ fun PracticeScreen(
                             ButtonDefaults.buttonColors(containerColor = SigniaBluePrimary)
                         } else {
                             ButtonDefaults.buttonColors(
-                                containerColor = Color.White,
-                                contentColor = SigniaDarkPurple
+                                containerColor = ThemeManager.cardBackgroundColor,
+                                contentColor = ThemeManager.textColor
                             )
                         },
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
@@ -160,7 +160,7 @@ fun PracticeScreen(
                             text = option,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = if (isSelected) Color.White else SigniaDarkPurple
+                            color = if (isSelected) Color.White else ThemeManager.textColor
                         )
                     }
                 }
@@ -205,8 +205,8 @@ fun PracticeScreen(
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SigniaDarkPurple,
-                    disabledContainerColor = SigniaDarkPurple.copy(alpha = 0.5f)
+                    containerColor = ThemeManager.heroCardColor,
+                    disabledContainerColor = ThemeManager.heroCardColor.copy(alpha = 0.5f)
                 )
             ) {
                 Text(

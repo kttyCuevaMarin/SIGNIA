@@ -55,14 +55,14 @@ fun RachaScreen(navController: NavController) {
     val today = remember { LocalDate.now() }
 
     Scaffold(
-        containerColor = SigniaLightLavender,
+        containerColor = ThemeManager.backgroundColor,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = "Mi Racha",
                         fontWeight = FontWeight.Bold,
-                        color = SigniaDarkPurple,
+                        color = ThemeManager.textColor,
                         fontSize = 20.sp
                     )
                 },
@@ -71,11 +71,11 @@ fun RachaScreen(navController: NavController) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = SigniaDarkPurple
+                            tint = ThemeManager.textColor
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeManager.topBarColor)
             )
         }
     ) { paddingValues ->
@@ -94,7 +94,7 @@ fun RachaScreen(navController: NavController) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = SigniaDarkPurple),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.heroCardColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
                 Column(
@@ -181,7 +181,7 @@ fun RachaScreen(navController: NavController) {
                 text = "Este mes",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = SigniaDarkPurple
+                color = ThemeManager.textColor
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -189,7 +189,7 @@ fun RachaScreen(navController: NavController) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -204,7 +204,7 @@ fun RachaScreen(navController: NavController) {
                             text = "$mesNombre ${currentYearMonth.year}",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = SigniaDarkPurple,
+                            color = ThemeManager.textColor,
                             letterSpacing = 1.sp
                         )
 
@@ -216,7 +216,7 @@ fun RachaScreen(navController: NavController) {
                                 Icon(
                                     imageVector = Icons.Default.ChevronLeft,
                                     contentDescription = "Mes anterior",
-                                    tint = SigniaDarkPurple
+                                    tint = ThemeManager.textColor
                                 )
                             }
                             IconButton(
@@ -226,7 +226,7 @@ fun RachaScreen(navController: NavController) {
                                 Icon(
                                     imageVector = Icons.Default.ChevronRight,
                                     contentDescription = "Mes siguiente",
-                                    tint = SigniaDarkPurple
+                                    tint = ThemeManager.textColor
                                 )
                             }
                         }
@@ -245,7 +245,7 @@ fun RachaScreen(navController: NavController) {
                                 text = dia,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = SigniaDarkPurple.copy(alpha = 0.6f),
+                                color = ThemeManager.subtextColor,
                                 modifier = Modifier.width(32.dp),
                                 textAlign = TextAlign.Center
                             )
@@ -284,7 +284,7 @@ fun RachaScreen(navController: NavController) {
                                                 when {
                                                     esHoy && esActivo -> SigniaBluePrimary
                                                     esActivo -> SigniaSoftLilac.copy(alpha = 0.5f)
-                                                    esHoy -> SigniaLightLavender
+                                                    esHoy -> ThemeManager.inputBackgroundColor
                                                     else -> Color.Transparent
                                                 }
                                             ),
@@ -296,9 +296,9 @@ fun RachaScreen(navController: NavController) {
                                             fontWeight = if (esActivo || esHoy) FontWeight.Bold else FontWeight.Normal,
                                             color = when {
                                                 esHoy && esActivo -> Color.White
-                                                esActivo -> SigniaDarkPurple
+                                                esActivo -> ThemeManager.textColor
                                                 esHoy -> SigniaBluePrimary
-                                                else -> SigniaDarkPurple.copy(alpha = 0.8f)
+                                                else -> ThemeManager.textColor
                                             }
                                         )
                                     }
@@ -328,7 +328,7 @@ fun RachaScreen(navController: NavController) {
                         Text(
                             text = "Días activos con lecciones",
                             fontSize = 11.sp,
-                            color = SigniaDarkPurple.copy(alpha = 0.7f),
+                            color = ThemeManager.subtextColor,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -349,7 +349,7 @@ fun RachaScreen(navController: NavController) {
                     text = "Últimos 7 días",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
                 Text(
                     text = "Ver historial",
@@ -365,7 +365,7 @@ fun RachaScreen(navController: NavController) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Row(
@@ -395,19 +395,19 @@ fun RachaScreen(navController: NavController) {
                                 text = letraDia,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = SigniaDarkPurple.copy(alpha = 0.7f)
+                                color = ThemeManager.subtextColor
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Surface(
                                 modifier = Modifier.size(36.dp),
                                 shape = CircleShape,
-                                color = if (esActivo) SigniaBluePrimary else SigniaLightLavender.copy(alpha = 0.6f)
+                                color = if (esActivo) SigniaBluePrimary else ThemeManager.inputBackgroundColor
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = if (esActivo) Icons.Default.Check else Icons.Default.Close,
                                         contentDescription = null,
-                                        tint = if (esActivo) Color.White else SigniaDarkPurple.copy(alpha = 0.4f),
+                                        tint = if (esActivo) Color.White else ThemeManager.subtextColor,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -428,7 +428,7 @@ fun RachaScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(54.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SigniaDarkPurple)
+                colors = ButtonDefaults.buttonColors(containerColor = ThemeManager.heroCardColor)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.MenuBook,

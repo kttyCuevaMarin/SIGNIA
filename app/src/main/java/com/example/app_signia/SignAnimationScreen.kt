@@ -113,14 +113,14 @@ fun SignAnimationScreen(
     }
 
     Scaffold(
-        containerColor = SigniaLightLavender,
+        containerColor = ThemeManager.backgroundColor,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = "Animación de Señas (LSP)",
                         fontWeight = FontWeight.Bold,
-                        color = SigniaDarkPurple,
+                        color = ThemeManager.textColor,
                         fontSize = 18.sp
                     )
                 },
@@ -129,11 +129,11 @@ fun SignAnimationScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = SigniaDarkPurple
+                            tint = ThemeManager.textColor
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeManager.topBarColor)
             )
         }
     ) { paddingValues ->
@@ -152,7 +152,7 @@ fun SignAnimationScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -165,13 +165,13 @@ fun SignAnimationScreen(
                             text = "Mensaje traducido:",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = SigniaDarkPurple.copy(alpha = 0.7f)
+                            color = ThemeManager.subtextColor
                         )
 
                         val disponiblesCount = processedWords.count { it.isAvailable }
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = Color(0xFFEBF3FA)
+                            color = ThemeManager.inputBackgroundColor
                         ) {
                             Text(
                                 text = "$disponiblesCount de ${processedWords.size} señas listas",
@@ -189,7 +189,7 @@ fun SignAnimationScreen(
                         text = "\"$decodedMessage\"",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = SigniaDarkPurple
+                        color = ThemeManager.textColor
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -212,9 +212,9 @@ fun SignAnimationScreen(
                                         isPlaying = false
                                     },
                                 color = when {
-                                    isSelected -> SigniaDarkPurple
-                                    isAvailable -> SigniaSoftLilac
-                                    else -> Color(0xFFF0E4F2)
+                                    isSelected -> SigniaBluePrimary
+                                    isAvailable -> ThemeManager.inputBackgroundColor
+                                    else -> ThemeManager.inputBackgroundColor.copy(alpha = 0.5f)
                                 },
                                 shape = RoundedCornerShape(12.dp)
                             ) {
@@ -226,7 +226,7 @@ fun SignAnimationScreen(
                                         imageVector = if (isAvailable) Icons.Default.CheckCircle else Icons.Default.Warning,
                                         contentDescription = null,
                                         tint = when {
-                                            isSelected -> SigniaBlueSecondary
+                                            isSelected -> Color.White
                                             isAvailable -> SigniaBlueAccent
                                             else -> SigniaError
                                         },
@@ -237,7 +237,7 @@ fun SignAnimationScreen(
                                         text = processed.originalWord,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (isSelected) Color.White else SigniaDarkPurple
+                                        color = if (isSelected) Color.White else ThemeManager.textColor
                                     )
                                 }
                             }
@@ -255,7 +255,7 @@ fun SignAnimationScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
                 ) {
                     Column(
@@ -273,12 +273,12 @@ fun SignAnimationScreen(
                                     text = currentSign.displayWord,
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = SigniaDarkPurple
+                                    color = ThemeManager.textColor
                                 )
                                 Text(
                                     text = "Categoría: ${currentSign.category}",
                                     fontSize = 12.sp,
-                                    color = SigniaDarkPurple.copy(alpha = 0.7f)
+                                    color = ThemeManager.subtextColor
                                 )
                             }
 
@@ -292,7 +292,7 @@ fun SignAnimationScreen(
                                     }
                                 },
                                 shape = RoundedCornerShape(12.dp),
-                                color = SigniaSoftLilac.copy(alpha = 0.4f)
+                                color = ThemeManager.inputBackgroundColor
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -301,7 +301,7 @@ fun SignAnimationScreen(
                                     Icon(
                                         imageVector = Icons.Default.Speed,
                                         contentDescription = null,
-                                        tint = SigniaDarkPurple,
+                                        tint = ThemeManager.textColor,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
@@ -309,7 +309,7 @@ fun SignAnimationScreen(
                                         text = "${playbackSpeed}x",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = SigniaDarkPurple
+                                        color = ThemeManager.textColor
                                     )
                                 }
                             }
@@ -347,7 +347,7 @@ fun SignAnimationScreen(
                                 Icon(
                                     imageVector = Icons.Default.SkipPrevious,
                                     contentDescription = "Seña anterior",
-                                    tint = if (processedWords.take(selectedWordIndex).any { it.isAvailable }) SigniaDarkPurple else Color.Gray,
+                                    tint = if (processedWords.take(selectedWordIndex).any { it.isAvailable }) ThemeManager.textColor else Color.Gray,
                                     modifier = Modifier.size(32.dp)
                                 )
                             }
@@ -356,7 +356,7 @@ fun SignAnimationScreen(
                             Button(
                                 onClick = { isPlaying = !isPlaying },
                                 shape = CircleShape,
-                                colors = ButtonDefaults.buttonColors(containerColor = SigniaDarkPurple),
+                                colors = ButtonDefaults.buttonColors(containerColor = ThemeManager.heroCardColor),
                                 modifier = Modifier.size(56.dp),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
@@ -398,7 +398,7 @@ fun SignAnimationScreen(
                                 Icon(
                                     imageVector = Icons.Default.SkipNext,
                                     contentDescription = "Seña siguiente",
-                                    tint = if (processedWords.drop(selectedWordIndex + 1).any { it.isAvailable }) SigniaDarkPurple else Color.Gray,
+                                    tint = if (processedWords.drop(selectedWordIndex + 1).any { it.isAvailable }) ThemeManager.textColor else Color.Gray,
                                     modifier = Modifier.size(32.dp)
                                 )
                             }
@@ -410,7 +410,7 @@ fun SignAnimationScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(
@@ -428,14 +428,14 @@ fun SignAnimationScreen(
                             text = "No se encontraron señas registradas para la frase ingresada.",
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = SigniaDarkPurple,
+                            color = ThemeManager.textColor,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Prueba con palabras como 'hola', 'gracias', 'por favor', 'adios', 'mama', 'papa', 'agua', 'comida', 'ayuda', 'doctor'.",
                             fontSize = 12.sp,
-                            color = Color.Gray,
+                            color = ThemeManager.subtextColor,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -461,7 +461,7 @@ fun SignVideoOrImagePlayer(
             .fillMaxWidth()
             .height(210.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(SigniaInputCardBg),
+            .background(ThemeManager.inputBackgroundColor),
         contentAlignment = Alignment.Center
     ) {
         if (signDef.videoRes != 0) {
@@ -499,7 +499,7 @@ fun SignVideoOrImagePlayer(
                     text = signDef.displayWord,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
             }
         }

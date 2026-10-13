@@ -90,14 +90,14 @@ fun TranslatorScreen(navController: NavController) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            containerColor = SigniaLightLavender,
+            containerColor = ThemeManager.backgroundColor,
             topBar = {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Texto / Voz a Señas",
+                            text = "",
                             fontWeight = FontWeight.Bold,
-                            color = SigniaDarkPurple,
+                            color = ThemeManager.textColor,
                             fontSize = 18.sp
                         )
                     },
@@ -106,11 +106,11 @@ fun TranslatorScreen(navController: NavController) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Volver",
-                                tint = SigniaDarkPurple
+                                tint = ThemeManager.textColor
                             )
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = SigniaLightLavender)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeManager.topBarColor)
                 )
             }
         ) { paddingValues ->
@@ -124,13 +124,13 @@ fun TranslatorScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // =================================================================
-                // CABECERA: TÍTULO Y DESCRIPCIÓN (IDÉNTICO A LA IMAGEN)
+                // CABECERA: TÍTULO Y DESCRIPCIÓN
                 // =================================================================
                 Text(
                     text = "Texto o Voz a Señas",
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = SigniaDarkPurple
+                    color = ThemeManager.textColor
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -138,7 +138,7 @@ fun TranslatorScreen(navController: NavController) {
                 Text(
                     text = "Escribe tu mensaje o usa el micrófono para convertir tus palabras en lenguaje de señas peruano (LSP) a través de nuestro avatar interactivo.",
                     fontSize = 14.sp,
-                    color = SigniaDarkPurple.copy(alpha = 0.85f),
+                    color = ThemeManager.subtextColor,
                     lineHeight = 20.sp
                 )
 
@@ -150,7 +150,7 @@ fun TranslatorScreen(navController: NavController) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    color = SigniaInputCardBg,
+                    color = ThemeManager.inputBackgroundColor,
                     shadowElevation = 1.dp
                 ) {
                     Box(
@@ -169,7 +169,7 @@ fun TranslatorScreen(navController: NavController) {
                                 placeholder = {
                                     Text(
                                         "Escribe el mensaje a traducir...",
-                                        color = Color.Gray,
+                                        color = ThemeManager.subtextColor,
                                         fontSize = 14.sp
                                     )
                                 },
@@ -182,8 +182,8 @@ fun TranslatorScreen(navController: NavController) {
                                     unfocusedContainerColor = Color.Transparent,
                                     focusedBorderColor = Color.Transparent,
                                     unfocusedBorderColor = Color.Transparent,
-                                    focusedTextColor = SigniaDarkPurple,
-                                    unfocusedTextColor = SigniaDarkPurple
+                                    focusedTextColor = ThemeManager.textColor,
+                                    unfocusedTextColor = ThemeManager.textColor
                                 ),
                                 maxLines = 4
                             )
@@ -239,7 +239,7 @@ fun TranslatorScreen(navController: NavController) {
                     text = "SUGERENCIAS RÁPIDAS",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = SigniaDarkPurple,
+                    color = ThemeManager.textColor,
                     letterSpacing = 0.8.sp
                 )
 
@@ -266,14 +266,14 @@ fun TranslatorScreen(navController: NavController) {
                                     iniciarConversion(sugerencia)
                                 },
                             shape = RoundedCornerShape(18.dp),
-                            color = SigniaInputCardBg,
+                            color = ThemeManager.inputBackgroundColor,
                             border = BorderStroke(1.dp, SigniaSoftLilac.copy(alpha = 0.5f))
                         ) {
                             Text(
                                 text = sugerencia,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = SigniaDarkPurple,
+                                color = ThemeManager.textColor,
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                             )
                         }
@@ -283,7 +283,7 @@ fun TranslatorScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // =================================================================
-                // BOTÓN PRINCIPAL AZUL (#2196F3): CONVERTIR A SEÑAS (SIN MANO)
+                // BOTÓN PRINCIPAL AZUL (#2196F3): CONVERTIR A SEÑAS
                 // =================================================================
                 Button(
                     onClick = { iniciarConversion(inputText) },
@@ -318,7 +318,7 @@ fun TranslatorScreen(navController: NavController) {
             ) {
                 Card(
                     shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
                     Column(
@@ -335,13 +335,13 @@ fun TranslatorScreen(navController: NavController) {
                             text = "Convertimiento a señas...",
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = SigniaDarkPurple
+                            color = ThemeManager.textColor
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Cargando animación LSP...",
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = ThemeManager.subtextColor
                         )
                     }
                 }
