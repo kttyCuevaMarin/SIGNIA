@@ -3,7 +3,6 @@ package com.example.app_signia
 import android.net.Uri
 import android.widget.Toast
 import android.widget.VideoView
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,16 +31,6 @@ import kotlinx.coroutines.delay
 
 val SigniaBlueAccent = Color(0xFF2196F3)
 
-/**
- * PANTALLA 2: REPRODUCTOR Y ANIMACIÓN DE SEÑAS (RF07)
- *
- * Muestra las animaciones/videos de las señas para el mensaje ingresado
- * reproduciéndose en secuencia, con controles completos de:
- * - Pausa y Reproducción (Play / Pause)
- * - Repetición completa (Replay) en azul (#2196F3)
- * - Ajuste de velocidad (0.5x, 1.0x, 1.5x)
- * - Navegación entre señas (Anterior / Siguiente)
- */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SignAnimationScreen(
@@ -51,17 +39,14 @@ fun SignAnimationScreen(
 ) {
     val context = LocalContext.current
 
-    // Procesar la frase recibida de la pantalla anterior
     val decodedMessage = remember(message) { Uri.decode(message) }
     val processedWords = remember(decodedMessage) { SignDictionary.processSentence(decodedMessage) }
 
-    // Estados del reproductor y secuencia de señas (RF07)
     var isPlaying by remember { mutableStateOf(true) }
     var selectedWordIndex by remember { mutableIntStateOf(0) }
     var currentStepIndex by remember { mutableIntStateOf(0) }
     var playbackSpeed by remember { mutableFloatStateOf(1.0f) }
 
-    // Inicializar la primera seña disponible
     LaunchedEffect(processedWords) {
         val firstIndex = processedWords.indexOfFirst { it.isAvailable }
         if (firstIndex != -1) {
@@ -73,12 +58,10 @@ fun SignAnimationScreen(
         }
     }
 
-    // Datos de la seña actualmente seleccionada
     val currentWord = processedWords.getOrNull(selectedWordIndex)
     val currentSign = currentWord?.sign
     val currentSteps = currentSign?.gestureSteps ?: emptyList()
 
-    // Bucle automático de animación en secuencia (RF07)
     LaunchedEffect(isPlaying, selectedWordIndex, currentStepIndex, playbackSpeed) {
         if (isPlaying && currentSteps.isNotEmpty()) {
             val delayMillis = (1500L / playbackSpeed).toLong()
@@ -87,7 +70,6 @@ fun SignAnimationScreen(
             if (currentStepIndex + 1 < currentSteps.size) {
                 currentStepIndex++
             } else {
-                // Pasar a la siguiente palabra que tenga seña disponible
                 val nextIndex = processedWords.indices.firstOrNull { idx ->
                     idx > selectedWordIndex && processedWords[idx].isAvailable
                 }
@@ -95,13 +77,12 @@ fun SignAnimationScreen(
                     selectedWordIndex = nextIndex
                     currentStepIndex = 0
                 } else {
-                    isPlaying = false // Fin de la frase
+                    isPlaying = false
                 }
             }
         }
     }
 
-    // Función para reiniciar / repetir toda la secuencia desde el inicio (RF07)
     fun repetirSecuenciaCompleta() {
         val firstAvailableIndex = processedWords.indexOfFirst { it.isAvailable }
         if (firstAvailableIndex != -1) {
@@ -146,9 +127,6 @@ fun SignAnimationScreen(
         ) {
             Spacer(modifier = Modifier.height(10.dp))
 
-            // =================================================================
-            // TARJETA DE RESUMEN DE LA FRASE TRADUCIDA
-            // =================================================================
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
@@ -194,7 +172,6 @@ fun SignAnimationScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Chips de desglose de palabras
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -248,9 +225,6 @@ fun SignAnimationScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // =================================================================
-            // REPRODUCTOR Y AVATAR DE ANIMACIÓN DE SEÑAS (RF07)
-            // =================================================================
             if (currentSign != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -262,7 +236,6 @@ fun SignAnimationScreen(
                         modifier = Modifier.padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Cabecera de la seña activa + Selector de Velocidad (RF07)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -282,7 +255,6 @@ fun SignAnimationScreen(
                                 )
                             }
 
-                            // Botón de Velocidad (0.5x, 1.0x, 1.5x)
                             Surface(
                                 modifier = Modifier.clickable {
                                     playbackSpeed = when (playbackSpeed) {
@@ -317,23 +289,18 @@ fun SignAnimationScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Visualizador del Avatar / Video MP4 / Ilustración
-                        SignVideoOrImagePlayer(
+                        SignVideoPlayer(
                             signDef = currentSign,
                             isPlaying = isPlaying
                         )
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // =====================================================
-                        // BARRA DE CONTROLES: PAUSA, PLAY, REPETIR Y NAVEGACIÓN (RF07)
-                        // =====================================================
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Seña Anterior
                             IconButton(
                                 onClick = {
                                     val prevIndex = processedWords.take(selectedWordIndex).indexOfLast { it.isAvailable }
@@ -352,7 +319,6 @@ fun SignAnimationScreen(
                                 )
                             }
 
-                            // Botón Play / Pausa (RF07)
                             Button(
                                 onClick = { isPlaying = !isPlaying },
                                 shape = CircleShape,
@@ -368,7 +334,6 @@ fun SignAnimationScreen(
                                 )
                             }
 
-                            // Botón REPETIR / REPLAY (RF07) - Color Azul #2196F3
                             Button(
                                 onClick = { repetirSecuenciaCompleta() },
                                 shape = CircleShape,
@@ -384,7 +349,6 @@ fun SignAnimationScreen(
                                 )
                             }
 
-                            // Seña Siguiente
                             IconButton(
                                 onClick = {
                                     val nextIndex = processedWords.drop(selectedWordIndex + 1).indexOfFirst { it.isAvailable }
@@ -406,7 +370,6 @@ fun SignAnimationScreen(
                     }
                 }
             } else {
-                // Si ninguna palabra tenía seña disponible
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
@@ -431,13 +394,6 @@ fun SignAnimationScreen(
                             color = ThemeManager.textColor,
                             textAlign = TextAlign.Center
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Prueba con palabras como 'hola', 'gracias', 'por favor', 'adios', 'mama', 'papa', 'agua', 'comida', 'ayuda', 'doctor'.",
-                            fontSize = 12.sp,
-                            color = ThemeManager.subtextColor,
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
             }
@@ -447,15 +403,18 @@ fun SignAnimationScreen(
     }
 }
 
-/**
- * REPRODUCTOR DE VIDEO O AVATAR DE ANIMACIÓN DE SEÑAS (LSP)
- */
 @Composable
-fun SignVideoOrImagePlayer(
+fun SignVideoPlayer(
     signDef: SignDefinition,
     isPlaying: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val rawResourceId = remember(signDef.videoResName) {
+        val resName = signDef.videoResName.ifBlank { "hola" }
+        context.resources.getIdentifier(resName, "raw", context.packageName)
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -464,12 +423,11 @@ fun SignVideoOrImagePlayer(
             .background(ThemeManager.inputBackgroundColor),
         contentAlignment = Alignment.Center
     ) {
-        if (signDef.videoRes != 0) {
-            // Reproducción de video MP4
+        if (rawResourceId != 0) {
             AndroidView(
                 factory = { ctx ->
                     VideoView(ctx).apply {
-                        val videoUri = Uri.parse("android.resource://${ctx.packageName}/${signDef.videoRes}")
+                        val videoUri = Uri.parse("android.resource://${ctx.packageName}/$rawResourceId")
                         setVideoURI(videoUri)
                         setOnPreparedListener { mp -> mp.isLooping = true }
                     }
@@ -483,17 +441,7 @@ fun SignVideoOrImagePlayer(
                 },
                 modifier = Modifier.fillMaxSize()
             )
-        } else if (signDef.imageRes != 0) {
-            // Imagen estática ilustrativa
-            Image(
-                painter = painterResource(id = signDef.imageRes),
-                contentDescription = "Ilustración seña ${signDef.displayWord}",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            )
         } else {
-            // Avatar animado/texto ilustrativo (Sin icono de mano)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = signDef.displayWord,
@@ -504,7 +452,6 @@ fun SignVideoOrImagePlayer(
             }
         }
 
-        // Badge indicador flotante de estado en color azul (#2196F3)
         if (isPlaying) {
             Surface(
                 modifier = Modifier

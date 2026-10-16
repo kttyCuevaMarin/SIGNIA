@@ -2,7 +2,6 @@ package com.example.app_signia
 
 import android.net.Uri
 import android.widget.VideoView
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +27,7 @@ import com.example.app_signia.ui.theme.*
 
 /**
  * RF09 - ANIMACIÓN EXPLICATIVA DE CADA SEÑA Y MANEJO DE ERRORES DE CARGA
- * Reproduce el video o ilustración de la seña, muestra sus pasos detallados
+ * Reproduce el video de la seña, muestra sus pasos detallados
  * y maneja estados de error si el recurso multimedia falla.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,13 +36,25 @@ fun SignDetailScreen(
     navController: NavController,
     wordKey: String
 ) {
-    // Buscar la seña en el diccionario local
+    val context = LocalContext.current
+
+    // Buscar la seña en el diccionario sincronizado con Firestore
     val signDef = remember(wordKey) {
         SignDictionary.dictionary[wordKey.lowercase()]
     }
 
     var isPlaying by remember { mutableStateOf(true) }
     var hasMediaError by remember { mutableStateOf(false) }
+
+    // Obtener el identificador numérico del video local según el nombre guardado en Firestore
+    val rawResourceId = remember(signDef?.videoResName) {
+        val resName = signDef?.videoResName ?: "hola"
+        if (resName.isNotBlank()) {
+            context.resources.getIdentifier(resName, "raw", context.packageName)
+        } else {
+            R.raw.hola // Video por defecto
+        }
+    }
 
     Scaffold(
         containerColor = SigniaLightLavender,
@@ -71,7 +82,6 @@ fun SignDetailScreen(
         }
     ) { paddingValues ->
         if (signDef == null) {
-            // Estado si no se encuentra la seña
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -116,7 +126,6 @@ fun SignDetailScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             if (hasMediaError) {
-                                // ESTADO DE ERROR DE CARGA (RF09)
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier.padding(16.dp)
@@ -142,12 +151,11 @@ fun SignDetailScreen(
                                         Text("Reintentar", fontSize = 12.sp)
                                     }
                                 }
-                            } else if (signDef.videoRes != 0) {
-                                // Reproductor de Video MP4 con captura de errores
+                            } else if (rawResourceId != 0) {
                                 AndroidView(
                                     factory = { ctx ->
                                         VideoView(ctx).apply {
-                                            val videoUri = Uri.parse("android.resource://${ctx.packageName}/${signDef.videoRes}")
+                                            val videoUri = Uri.parse("android.resource://${ctx.packageName}/$rawResourceId")
                                             setVideoURI(videoUri)
                                             setOnPreparedListener { mp ->
                                                 mp.isLooping = true
@@ -167,14 +175,6 @@ fun SignDetailScreen(
                                     },
                                     modifier = Modifier.fillMaxSize()
                                 )
-                            } else if (signDef.imageRes != 0) {
-                                Image(
-                                    painter = painterResource(id = signDef.imageRes),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(16.dp)
-                                )
                             } else {
                                 Text(
                                     text = signDef.displayWord,
@@ -193,7 +193,6 @@ fun SignDetailScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Botón Play / Pausa
                             Button(
                                 onClick = { isPlaying = !isPlaying },
                                 shape = CircleShape,
@@ -210,7 +209,6 @@ fun SignDetailScreen(
 
                             Spacer(modifier = Modifier.width(20.dp))
 
-                            // Botón Repetir / Replay (Color Azul #2196F3)
                             Button(
                                 onClick = {
                                     isPlaying = false

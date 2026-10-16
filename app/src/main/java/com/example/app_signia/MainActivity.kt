@@ -14,6 +14,10 @@ import com.example.app_signia.ui.theme.APPSIGNIATheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Cargar el catálogo de señas y videos desde la base de datos de Firebase Firestore (RF08)
+        SignDictionary.loadSignsFromFirestore()
+
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
@@ -40,7 +44,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // ==========================================
-                    // NUEVAS RUTAS: RF08 y RF09 (Categorías y Detalle)
+                    // RUTAS: RF08 y RF09 (Categorías y Detalle)
                     // ==========================================
                     composable(
                         route = "category_signs/{categoryId}",
