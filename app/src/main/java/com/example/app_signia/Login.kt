@@ -35,6 +35,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Login(navController: NavController) {
     val auth = remember { Firebase.auth }
@@ -42,31 +43,36 @@ fun Login(navController: NavController) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(value = false) }
-    var isLoading by remember { mutableStateOf(value = false) }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
-    // Configuración oficial de Google Sign-In
-    val gso = remember {
+    // ID de Cliente Web de Google Sign-In
+    val webClientId = "595956443369-4v6h2e2ltlt96p3vir3uuvqj0ht3u6f8.apps.googleusercontent.com"
+
+    val gso = remember(webClientId) {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
     }
-    val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
+    val googleSignInClient = remember(context, gso) { GoogleSignIn.getClient(context, gso) }
 
     val googleLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
+        contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)
             val idToken = account?.idToken
-            if (idToken != null) {
+            if (!idToken.isNullOrEmpty()) {
                 isLoading = true
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
                 auth.signInWithCredential(credential)
                     .addOnSuccessListener {
                         isLoading = false
+                        val uid = auth.currentUser?.uid
+                        StreakManager.loadStreakForUser(uid)
+                        ProgressManager.loadProgressForUser(uid)
                         Toast.makeText(context, "¡Sesión iniciada con Google!", Toast.LENGTH_SHORT).show()
                         navController.navigate("home") {
                             popUpTo("login") { inclusive = true }
@@ -80,7 +86,7 @@ fun Login(navController: NavController) {
                 Toast.makeText(context, "No se pudo obtener el token de Google", Toast.LENGTH_SHORT).show()
             }
         } catch (e: ApiException) {
-            if (e.statusCode != 12501) { // 12501 = Cancelado por el usuario
+            if (e.statusCode != 12501) {
                 Toast.makeText(context, "Error al iniciar con Google (Código: ${e.statusCode}): ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             }
         }
@@ -247,6 +253,9 @@ fun Login(navController: NavController) {
                     auth.signInWithEmailAndPassword(email.trim(), password)
                         .addOnSuccessListener {
                             isLoading = false
+                            val uid = auth.currentUser?.uid
+                            StreakManager.loadStreakForUser(uid)
+                            ProgressManager.loadProgressForUser(uid)
                             navController.navigate("home") {
                                 popUpTo("login") { inclusive = true }
                             }
@@ -297,7 +306,6 @@ fun Login(navController: NavController) {
             // Google Button con selector de cuentas activo
             OutlinedButton(
                 onClick = {
-                    // Cierra sesión previa de Google para garantizar que SIEMPRE aparezca el modal con las cuentas
                     googleSignInClient.signOut().addOnCompleteListener {
                         googleLauncher.launch(googleSignInClient.signInIntent)
                     }
@@ -329,7 +337,9 @@ fun Login(navController: NavController) {
 
             // Apple Button
             Button(
-                onClick = { },
+                onClick = {
+                    Toast.makeText(context, "Inicio de sesión con Apple próximamente", Toast.LENGTH_SHORT).show()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

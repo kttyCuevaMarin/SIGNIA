@@ -221,7 +221,7 @@ fun PerfilScreen(navController: NavController) {
                             Text("Señas Aprendidas", fontSize = 14.sp, color = ThemeManager.textColor)
                         }
                         Text(
-                            text = "${MockProgressData.completedSigns} / ${MockProgressData.totalSigns}",
+                            text = "${ProgressManager.completedSignsCount} / ${MockProgressData.totalSigns}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                             color = ThemeManager.textColor
@@ -379,6 +379,7 @@ fun PerfilScreen(navController: NavController) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Cargar Foto de Perfil", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }
+
 
             Spacer(modifier = Modifier.height(12.dp))
 

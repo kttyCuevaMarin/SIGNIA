@@ -27,10 +27,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
-import kotlinx.coroutines.delay
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 val SigniaBlueAccent = Color(0xFF2196F3)
 
+/**
+ * RF07 - MOSTRAR ANIMACIÓN DE LAS SEÑAS EN SECUENCIA
+ * Reproduce de manera secuencial y fluida las animaciones de las señas encontradas,
+ * sin parálisis de video ni errores de cambio de recurso.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SignAnimationScreen(
@@ -38,20 +44,20 @@ fun SignAnimationScreen(
     message: String
 ) {
     val context = LocalContext.current
+    val currentUser = remember { Firebase.auth.currentUser }
 
     val decodedMessage = remember(message) { Uri.decode(message) }
     val processedWords = remember(decodedMessage) { SignDictionary.processSentence(decodedMessage) }
 
     var isPlaying by remember { mutableStateOf(true) }
     var selectedWordIndex by remember { mutableIntStateOf(0) }
-    var currentStepIndex by remember { mutableIntStateOf(0) }
     var playbackSpeed by remember { mutableFloatStateOf(1.0f) }
 
+    // Al cargar las palabras, seleccionar la primera disponible
     LaunchedEffect(processedWords) {
         val firstIndex = processedWords.indexOfFirst { it.isAvailable }
         if (firstIndex != -1) {
             selectedWordIndex = firstIndex
-            currentStepIndex = 0
             isPlaying = true
         } else {
             isPlaying = false
@@ -60,26 +66,25 @@ fun SignAnimationScreen(
 
     val currentWord = processedWords.getOrNull(selectedWordIndex)
     val currentSign = currentWord?.sign
-    val currentSteps = currentSign?.gestureSteps ?: emptyList()
 
-    LaunchedEffect(isPlaying, selectedWordIndex, currentStepIndex, playbackSpeed) {
-        if (isPlaying && currentSteps.isNotEmpty()) {
-            val delayMillis = (1500L / playbackSpeed).toLong()
-            delay(delayMillis)
+    // Función para avanzar a la siguiente seña de la secuencia cuando termina un video
+    fun avanzarSiguienteSena() {
+        // Al ver la animación de la seña, se marca automáticamente como completada y se suma racha
+        currentSign?.let { sign ->
+            ProgressManager.markSignCompleted(currentUser?.uid, sign.word)
+            StreakManager.recordLessonCompleted(currentUser?.uid)
+        }
 
-            if (currentStepIndex + 1 < currentSteps.size) {
-                currentStepIndex++
-            } else {
-                val nextIndex = processedWords.indices.firstOrNull { idx ->
-                    idx > selectedWordIndex && processedWords[idx].isAvailable
-                }
-                if (nextIndex != null) {
-                    selectedWordIndex = nextIndex
-                    currentStepIndex = 0
-                } else {
-                    isPlaying = false
-                }
-            }
+        val nextIndex = processedWords.indices.firstOrNull { idx ->
+            idx > selectedWordIndex && processedWords[idx].isAvailable
+        }
+        if (nextIndex != null) {
+            selectedWordIndex = nextIndex
+            isPlaying = true
+        } else {
+            // Se completó toda la secuencia de la oración
+            isPlaying = false
+            Toast.makeText(context, "Traducción completada. ¡Progreso guardado y racha actualizada! 🔥", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -87,7 +92,6 @@ fun SignAnimationScreen(
         val firstAvailableIndex = processedWords.indexOfFirst { it.isAvailable }
         if (firstAvailableIndex != -1) {
             selectedWordIndex = firstAvailableIndex
-            currentStepIndex = 0
             isPlaying = true
             Toast.makeText(context, "Reiniciando secuencia de señas...", Toast.LENGTH_SHORT).show()
         }
@@ -152,7 +156,7 @@ fun SignAnimationScreen(
                             color = ThemeManager.inputBackgroundColor
                         ) {
                             Text(
-                                text = "$disponiblesCount de ${processedWords.size} señas listas",
+                                text = "$disponiblesCount de ${processedWords.size} señas encontradas",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = SigniaBlueAccent,
@@ -185,8 +189,7 @@ fun SignAnimationScreen(
                                     .clip(RoundedCornerShape(12.dp))
                                     .clickable(enabled = isAvailable) {
                                         selectedWordIndex = index
-                                        currentStepIndex = 0
-                                        isPlaying = false
+                                        isPlaying = true
                                     },
                                 color = when {
                                     isSelected -> SigniaBluePrimary
@@ -289,13 +292,18 @@ fun SignAnimationScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // Reproductor de video dinámico sin parálisis
                         SignVideoPlayer(
                             signDef = currentSign,
-                            isPlaying = isPlaying
+                            isPlaying = isPlaying,
+                            onVideoEnded = {
+                                avanzarSiguienteSena()
+                            }
                         )
 
                         Spacer(modifier = Modifier.height(20.dp))
 
+                        // Controles de Navegación y Reproducción
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -306,7 +314,7 @@ fun SignAnimationScreen(
                                     val prevIndex = processedWords.take(selectedWordIndex).indexOfLast { it.isAvailable }
                                     if (prevIndex != -1) {
                                         selectedWordIndex = prevIndex
-                                        currentStepIndex = 0
+                                        isPlaying = true
                                     }
                                 },
                                 enabled = processedWords.take(selectedWordIndex).any { it.isAvailable }
@@ -354,7 +362,7 @@ fun SignAnimationScreen(
                                     val nextIndex = processedWords.drop(selectedWordIndex + 1).indexOfFirst { it.isAvailable }
                                     if (nextIndex != -1) {
                                         selectedWordIndex = selectedWordIndex + 1 + nextIndex
-                                        currentStepIndex = 0
+                                        isPlaying = true
                                     }
                                 },
                                 enabled = processedWords.drop(selectedWordIndex + 1).any { it.isAvailable }
@@ -403,16 +411,21 @@ fun SignAnimationScreen(
     }
 }
 
+/**
+ * REPRODUCTOR DE VIDEO DE SEÑA CON ACTUALIZACIÓN DINÁMICA DE RECURSO Y MANEJO DE FIN DE VIDEO
+ */
 @Composable
 fun SignVideoPlayer(
     signDef: SignDefinition,
     isPlaying: Boolean,
+    onVideoEnded: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val rawResourceId = remember(signDef.videoResName) {
         val resName = signDef.videoResName.ifBlank { "hola" }
-        context.resources.getIdentifier(resName, "raw", context.packageName)
+        val id = context.resources.getIdentifier(resName, "raw", context.packageName)
+        if (id != 0) id else R.raw.hola
     }
 
     Box(
@@ -428,15 +441,34 @@ fun SignVideoPlayer(
                 factory = { ctx ->
                     VideoView(ctx).apply {
                         val videoUri = Uri.parse("android.resource://${ctx.packageName}/$rawResourceId")
+                        tag = rawResourceId
                         setVideoURI(videoUri)
-                        setOnPreparedListener { mp -> mp.isLooping = true }
+                        setOnPreparedListener { mp ->
+                            mp.isLooping = false
+                        }
+                        setOnCompletionListener {
+                            onVideoEnded()
+                        }
                     }
                 },
                 update = { videoView ->
-                    if (isPlaying) {
-                        if (!videoView.isPlaying) videoView.start()
+                    // ACTUALIZACIÓN DE RECURSO DE VIDEO SI CAMBIÓ LA SEÑA SELECCIONADA
+                    if (videoView.tag != rawResourceId) {
+                        videoView.tag = rawResourceId
+                        val videoUri = Uri.parse("android.resource://${videoView.context.packageName}/$rawResourceId")
+                        videoView.setVideoURI(videoUri)
+                        videoView.setOnCompletionListener {
+                            onVideoEnded()
+                        }
+                        if (isPlaying) {
+                            videoView.start()
+                        }
                     } else {
-                        if (videoView.isPlaying) videoView.pause()
+                        if (isPlaying) {
+                            if (!videoView.isPlaying) videoView.start()
+                        } else {
+                            if (videoView.isPlaying) videoView.pause()
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxSize()

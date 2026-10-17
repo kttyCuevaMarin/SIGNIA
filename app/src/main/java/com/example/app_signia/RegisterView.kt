@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 
 @Composable
 fun RegisterView(navController: NavController) {
@@ -281,8 +282,33 @@ fun RegisterView(navController: NavController) {
 
                     isLoading = true
                     auth.createUserWithEmailAndPassword(email.trim(), password)
-                        .addOnSuccessListener {
+                        .addOnSuccessListener { authResult ->
                             isLoading = false
+
+                            // Reiniciar Racha a 0 para el usuario nuevo (RF17)
+                            StreakManager.resetStreakToZeroForNewUser()
+                            ProgressManager.completedSignsList.clear()
+                            ProgressManager.completedSignsCount = 0
+                            ProgressManager.totalXp = 0
+
+                            // Guardar perfil inicial en Firestore con Racha 0
+                            val userId = authResult.user?.uid
+                            if (!userId.isNullOrBlank()) {
+                                val userProfile = hashMapOf(
+                                    "fullName" to fullName.trim(),
+                                    "email" to email.trim(),
+                                    "currentStreak" to 0,
+                                    "maxStreak" to 0,
+                                    "completedSignsCount" to 0,
+                                    "totalXp" to 0,
+                                    "activeDates" to emptyList<String>()
+                                )
+                                com.google.firebase.Firebase.firestore
+                                    .collection("users")
+                                    .document(userId)
+                                    .set(userProfile)
+                            }
+
                             navController.navigate("home") {
                                 popUpTo("register") { inclusive = true }
                             }
