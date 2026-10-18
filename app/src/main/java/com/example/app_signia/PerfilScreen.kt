@@ -210,6 +210,10 @@ fun PerfilScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    val totalSignsInDict = remember(SignDictionary.dictionary.size) {
+                        SignDictionary.dictionary.values.distinctBy { it.word.lowercase() }.size.coerceAtLeast(1)
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -221,7 +225,7 @@ fun PerfilScreen(navController: NavController) {
                             Text("Señas Aprendidas", fontSize = 14.sp, color = ThemeManager.textColor)
                         }
                         Text(
-                            text = "${ProgressManager.completedSignsCount} / ${MockProgressData.totalSigns}",
+                            text = "${ProgressManager.completedSignsCount} / $totalSignsInDict",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                             color = ThemeManager.textColor

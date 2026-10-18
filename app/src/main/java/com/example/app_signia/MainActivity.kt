@@ -91,16 +91,6 @@ class MainActivity : ComponentActivity() {
                         }
                         // ==========================================
 
-                        composable("practice") {
-                            PracticeScreen(navController = navController, category = "saludos")
-                        }
-                        composable(
-                            route = "practice/{category}",
-                            arguments = listOf(navArgument("category") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val categoryParam = backStackEntry.arguments?.getString("category") ?: "saludos"
-                            PracticeScreen(navController = navController, category = categoryParam)
-                        }
                         composable("perfil") {
                             PerfilScreen(navController = navController)
                         }
