@@ -74,7 +74,7 @@ object SignDictionary {
     fun seedSignsToFirestore() {
         val db = Firebase.firestore
         val collectionWithEne = db.collection("diccionario_señas")
-        val collectionWithN = db.collection("diccionario_senas")
+        val collectionWithN = db.collection("diccionario_señas")
 
         for ((key, sign) in dictionary) {
             val documentData = hashMapOf(
