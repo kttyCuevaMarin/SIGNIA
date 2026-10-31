@@ -94,11 +94,23 @@ class MainActivity : ComponentActivity() {
                         composable("perfil") {
                             PerfilScreen(navController = navController)
                         }
+                        composable("camera_recognition") {
+                            CameraRecognitionScreen(navController = navController)
+                        }
                         composable("racha") {
                             RachaScreen(navController = navController)
                         }
                         composable("translator") {
                             TranslatorScreen(navController = navController)
+                        }
+                        composable("translation_mode_selector") {
+                            TranslationModeSelectorScreen(navController = navController)
+                        }
+                        composable("sign_scan_details") {
+                            SignScanDetailsScreen(navController = navController)
+                        }
+                        composable("translation_details_camera") {
+                            TranslationDetailsCameraScreen(navController = navController)
                         }
                         composable(
                             route = "animation_player/{message}",

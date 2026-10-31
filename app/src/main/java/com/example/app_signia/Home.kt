@@ -74,20 +74,21 @@ fun Home(navController: NavController = rememberNavController()) {
     val modules = listOf(
         SigniaModule(
             title = "Reconocimiento de Señas",
-            description = "Usa la cámara para traducir LSP a texto y reproducción de voz en tiempo real.",
+            description = "Usa la cámara en vivo para capturar tus manos y reconocer señas LSP.",
             icon = Icons.Default.CameraAlt,
-            route = "aprende_lsp",
+            route = "camera_recognition",
             cardBgColor = ThemeManager.heroCardColor,
             textColor = Color.White,
             badgeText = "IA"
         ),
         SigniaModule(
             title = "Traducción lenguaje de señas",
-            description = "Escribe o habla para generar animaciones tridimensionales de las señas correspondientes.",
+            description = "Selecciona el modo de traducción por cámara en vivo o por texto/voz.",
             icon = Icons.Default.RecordVoiceOver,
-            route = "translator",
+            route = "translation_mode_selector",
             cardBgColor = ThemeManager.cardBackgroundColor,
-            textColor = ThemeManager.textColor
+            textColor = ThemeManager.textColor,
+            badgeText = "IA"
         ),
         SigniaModule(
             title = "Aprende LSP",
@@ -102,7 +103,7 @@ fun Home(navController: NavController = rememberNavController()) {
             title = "Guía de Uso",
             description = "Manual interactivo para aprender a posicionar las manos y optimizar la traducción.",
             icon = Icons.AutoMirrored.Filled.MenuBook,
-            route = "translator",
+            route = "translation_mode_selector",
             cardBgColor = ThemeManager.cardBackgroundColor,
             textColor = ThemeManager.textColor
         )
@@ -186,7 +187,7 @@ fun Home(navController: NavController = rememberNavController()) {
                     selected = selectedItem == 1,
                     onClick = {
                         selectedItem = 1
-                        navController.navigate("translator")
+                        navController.navigate("translation_mode_selector")
                     },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = SigniaBluePrimary,

@@ -53,6 +53,17 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // Dependencias de CameraX para captura e imágenes en vivo (RF3)
+    val cameraxVersion = "1.3.4"
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // Google MediaPipe Tasks Vision para Inteligencia Artificial de Reconocimiento de Manos REAL (RF3)
+    implementation("com.google.mediapipe:tasks-vision:0.10.14")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
