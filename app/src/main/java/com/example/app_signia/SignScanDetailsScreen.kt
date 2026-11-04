@@ -415,7 +415,7 @@ fun SignScanDetailsScreen(navController: NavController) {
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = if (!isHandPresent) "Muestra tus manos a la cámara" else "Manos detectadas con IA",
+                                        text = if (isRecording) "● Grabando en vivo..." else if (isHandPresent) "Manos detectadas con IA" else "Cámara activa (IA lista)",
                                         color = SigniaWhite,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold
@@ -579,23 +579,15 @@ fun SignScanDetailsScreen(navController: NavController) {
                                         .background(SigniaBluePrimary)
                                         .clickable {
                                             if (!isRecording) {
-                                                if (!isHandPresent || allHandsLandmarksList.isEmpty()) {
-                                                    Toast.makeText(
-                                                        context,
-                                                        "¡Muestra tus manos a la cámara para iniciar el reconocimiento!",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                } else {
-                                                    isRecording = true
-                                                    recordedSigns.clear()
-                                                    if (currentDetectedWord != "Buscando manos..." && currentDetectedWord != "Confirmando seña...") {
-                                                        recordedSigns.add(currentDetectedWord)
-                                                    }
-                                                    Toast.makeText(context, "Grabando seña... Realiza tu gesto frente a la cámara", Toast.LENGTH_SHORT).show()
+                                                isRecording = true
+                                                recordedSigns.clear()
+                                                if (currentDetectedWord != "Buscando manos..." && currentDetectedWord != "Confirmando seña..." && currentDetectedWord != "Seña no registrada") {
+                                                    recordedSigns.add(currentDetectedWord)
                                                 }
+                                                Toast.makeText(context, "Grabando seña... Realiza tu gesto frente a la cámara", Toast.LENGTH_SHORT).show()
                                             } else {
                                                 isRecording = false
-                                                if (recordedSigns.isEmpty() && currentDetectedWord != "Buscando manos..." && currentDetectedWord != "Confirmando seña...") {
+                                                if (recordedSigns.isEmpty() && currentDetectedWord != "Buscando manos..." && currentDetectedWord != "Confirmando seña..." && currentDetectedWord != "Seña no registrada") {
                                                     recordedSigns.add(currentDetectedWord)
                                                 }
                                                 isRecognitionResultState = true

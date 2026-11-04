@@ -139,6 +139,9 @@ fun CameraRecognitionScreen(navController: NavController) {
     var textToSpeech by remember { mutableStateOf<TextToSpeech?>(null) }
     var lastSpokenWord by remember { mutableStateOf("") }
 
+    // Executor secundario para procesamiento de IA sin congelar la UI de la cámara
+    val cameraExecutor = remember { java.util.concurrent.Executors.newSingleThreadExecutor() }
+
     DisposableEffect(Unit) {
         val tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
@@ -149,6 +152,7 @@ fun CameraRecognitionScreen(navController: NavController) {
         onDispose {
             tts.stop()
             tts.shutdown()
+            cameraExecutor.shutdown()
         }
     }
 
@@ -338,8 +342,7 @@ fun CameraRecognitionScreen(navController: NavController) {
                             .setTargetResolution(android.util.Size(640, 480))
                             .build()
 
-                        val executor = ContextCompat.getMainExecutor(context)
-                        imageAnalysis.setAnalyzer(executor) { imageProxy ->
+                        imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                             handLandmarkerHelper.detectLiveStream(imageProxy, isCameraFront)
                         }
 

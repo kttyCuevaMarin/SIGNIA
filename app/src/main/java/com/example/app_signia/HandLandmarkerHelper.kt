@@ -23,11 +23,15 @@ class HandLandmarkerHelper(
     val onError: (String) -> Unit
 ) {
     private var handLandmarker: HandLandmarker? = null
+    private var teachableMachineClassifier: TeachableMachineClassifier? = null
     @Volatile
     private var lastInferenceTime = 0L
+    @Volatile
+    private var latestBitmap: Bitmap? = null
 
     init {
         setupHandLandmarker()
+        setupTeachableMachine()
     }
 
     private fun setupHandLandmarker() {
@@ -55,11 +59,19 @@ class HandLandmarkerHelper(
         }
     }
 
+    private fun setupTeachableMachine() {
+        try {
+            teachableMachineClassifier = TeachableMachineClassifier(context)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun detectLiveStream(imageProxy: ImageProxy, isFrontCamera: Boolean) {
         val currentTime = SystemClock.uptimeMillis()
 
-        // INFERENCIA EN TIEMPO REAL ULTRA RÁPIDA (~30 FPS)
-        if (currentTime - lastInferenceTime < 35L) {
+        // THROTTLING OPTIMIZADO (~7 FPS DE IA) PARA ELIMINAR EL LAG Y CONGELAMIENTOS DE MEMORIA
+        if (currentTime - lastInferenceTime < 140L) {
             imageProxy.close()
             return
         }
@@ -80,6 +92,17 @@ class HandLandmarkerHelper(
                 bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
             )
 
+            // Reducir tamaño a 224x224 una sola vez para que no consuma memoria excesiva
+            val smallBitmap = Bitmap.createScaledBitmap(rotatedBitmap, 224, 224, false)
+
+            val oldBitmap = latestBitmap
+            latestBitmap = smallBitmap
+
+            // Reciclar el bitmap antiguo para evitar congelamientos por Garbage Collector
+            if (oldBitmap != null && !oldBitmap.isRecycled && oldBitmap != smallBitmap) {
+                oldBitmap.recycle()
+            }
+
             val mpImage = BitmapImageBuilder(rotatedBitmap).build()
 
             if (handLandmarker != null) {
@@ -93,18 +116,30 @@ class HandLandmarkerHelper(
     }
 
     private fun processHandLandmarks(result: HandLandmarkerResult) {
-        val allHands = result.landmarks()
-        if (allHands.isNullOrEmpty()) {
-            onResults(result, "Buscando manos...", 0, 0, emptyList())
-            return
+        val allHands = result.landmarks() ?: emptyList()
+        val totalKeypoints = allHands.sumOf { it.size }
+        val bitmap = latestBitmap
+
+        var displayWord = "Buscando manos..."
+        var confidence = 0
+
+        // 1. CLASIFICACIÓN ULTRA RÁPIDA CON TEACHABLE MACHINE (.TFLITE)
+        if (bitmap != null && !bitmap.isRecycled && teachableMachineClassifier != null) {
+            val tmResult = teachableMachineClassifier!!.classify(bitmap)
+            if (tmResult.word != "Seña no registrada" && tmResult.confidencePercentage > 35) {
+                displayWord = tmResult.word
+                confidence = tmResult.confidencePercentage
+            }
         }
 
-        // Calcula número total de puntos clave de todas las manos detectadas (21 por mano)
-        val totalKeypoints = allHands.sumOf { it.size }
-
-        // Clasificación evaluando la mano principal o ambas manos en HandGestureClassifier
-        val displayWord = HandGestureClassifier.classifyMultipleHands(allHands)
-        val confidence = 98
+        // 2. FALLBACK AL CLASIFICADOR GEOMÉTRICO SI HAY MANOS Y TEACHABLE MACHINE NO DETECTÓ
+        if (displayWord == "Buscando manos..." && allHands.isNotEmpty()) {
+            val fallbackWord = HandGestureClassifier.classifyMultipleHands(allHands)
+            if (fallbackWord != "Seña no registrada" && fallbackWord != "Buscando manos...") {
+                displayWord = fallbackWord
+                confidence = 88
+            }
+        }
 
         onResults(result, displayWord, totalKeypoints, confidence, allHands)
     }
@@ -112,5 +147,8 @@ class HandLandmarkerHelper(
     fun close() {
         handLandmarker?.close()
         handLandmarker = null
+        teachableMachineClassifier?.close()
+        teachableMachineClassifier = null
+        latestBitmap = null
     }
 }

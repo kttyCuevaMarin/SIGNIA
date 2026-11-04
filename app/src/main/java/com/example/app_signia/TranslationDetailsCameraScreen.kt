@@ -167,9 +167,12 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
         )
     }
 
+    val cameraExecutor = remember { java.util.concurrent.Executors.newSingleThreadExecutor() }
+
     DisposableEffect(Unit) {
         onDispose {
             handLandmarkerHelper.close()
+            cameraExecutor.shutdown()
         }
     }
 
@@ -353,8 +356,7 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                                     .setTargetResolution(android.util.Size(640, 480))
                                     .build()
 
-                                val executor = ContextCompat.getMainExecutor(context)
-                                imageAnalysis.setAnalyzer(executor) { imageProxy ->
+                                imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                                     handLandmarkerHelper.detectLiveStream(imageProxy, isCameraFront)
                                 }
 
@@ -406,7 +408,7 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                                 ) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = if (!isHandPresent) "Muestra tus manos a la cámara" else "Manos detectadas con IA",
+                                        text = if (isRecording) "● Grabando en vivo..." else if (isHandPresent) "Manos detectadas con IA" else "Cámara activa (IA lista)",
                                         color = SigniaWhite,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold
@@ -566,27 +568,19 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                                         .clip(CircleShape)
                                         .background(SigniaBluePrimary)
                                         .clickable {
-                                            if (!isHandPresent || allHandsLandmarksList.isEmpty()) {
-                                                Toast.makeText(
-                                                    context,
-                                                    "¡Muestra tus manos a la cámara para iniciar el reconocimiento!",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            } else {
-                                                if (!isRecording) {
-                                                    isRecording = true
-                                                    recordedSigns.clear()
-                                                    if (currentDetectedWord != "Buscando manos...") {
-                                                        recordedSigns.add(currentDetectedWord)
-                                                    }
-                                                    Toast.makeText(context, "Grabando seña... Realiza tu gesto frente a la cámara", Toast.LENGTH_SHORT).show()
-                                                } else {
-                                                    isRecording = false
-                                                    if (recordedSigns.isEmpty() && currentDetectedWord != "Buscando manos...") {
-                                                        recordedSigns.add(currentDetectedWord)
-                                                    }
-                                                    isRecognitionResultState = true
+                                            if (!isRecording) {
+                                                isRecording = true
+                                                recordedSigns.clear()
+                                                if (currentDetectedWord != "Buscando manos..." && currentDetectedWord != "Seña no registrada") {
+                                                    recordedSigns.add(currentDetectedWord)
                                                 }
+                                                Toast.makeText(context, "Grabando seña... Realiza tu gesto frente a la cámara", Toast.LENGTH_SHORT).show()
+                                            } else {
+                                                isRecording = false
+                                                if (recordedSigns.isEmpty() && currentDetectedWord != "Buscando manos..." && currentDetectedWord != "Seña no registrada") {
+                                                    recordedSigns.add(currentDetectedWord)
+                                                }
+                                                isRecognitionResultState = true
                                             }
                                         },
                                     contentAlignment = Alignment.Center
