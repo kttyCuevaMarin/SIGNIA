@@ -1,7 +1,6 @@
 package com.example.app_signia
 
-import android.net.Uri
-import android.widget.VideoView
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,26 +9,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
-/**
- * RF09 - ANIMACIÓN EXPLICATIVA DE CADA SEÑA Y MANEJO DE ERRORES DE CARGA
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignDetailScreen(
@@ -38,295 +36,224 @@ fun SignDetailScreen(
 ) {
     val context = LocalContext.current
     val currentUser = remember { Firebase.auth.currentUser }
-
-    val signDef = remember(wordKey) {
-        SignDictionary.dictionary[wordKey.lowercase()]
-    }
-
+    var isLearned by remember { mutableStateOf(false) }
     var isPlaying by remember { mutableStateOf(true) }
-    var hasMediaError by remember { mutableStateOf(false) }
+    var restartTrigger by remember { mutableIntStateOf(0) }
 
-    val rawResourceId = remember(signDef?.videoResName) {
-        val resName = signDef?.videoResName ?: "hola"
-        if (resName.isNotBlank()) {
-            val id = context.resources.getIdentifier(resName, "raw", context.packageName)
-            if (id != 0) id else R.raw.hola
-        } else {
-            R.raw.hola
-        }
+    // Obtenemos la definición del video de la seña utilizando el diccionario del proyecto
+    val signDefinition = remember(wordKey) {
+        SignDictionary.processSentence(wordKey).firstOrNull()?.sign
     }
 
     Scaffold(
         containerColor = ThemeManager.backgroundColor,
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = signDef?.displayWord ?: "Detalle de Seña",
-                        fontWeight = FontWeight.Bold,
-                        color = ThemeManager.textColor,
-                        fontSize = 18.sp
-                    )
-                },
+                title = { Text(text = wordKey.uppercase(), fontWeight = FontWeight.Bold, color = ThemeManager.textColor) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = ThemeManager.textColor
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = ThemeManager.textColor)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeManager.topBarColor)
             )
         }
     ) { paddingValues ->
-        if (signDef == null) {
-            Box(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Tarjeta de Animación / Reproductor de video de la seña
+            Card(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .height(340.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor)
             ) {
-                Text(
-                    text = "No se encontró información para esta seña.",
-                    color = SigniaError,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 20.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(ThemeManager.inputBackgroundColor),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (hasMediaError) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier.padding(16.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.ErrorOutline,
-                                        contentDescription = "Error",
-                                        tint = SigniaError,
-                                        modifier = Modifier.size(42.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "No se pudo cargar el video explicativo",
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = ThemeManager.textColor
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    OutlinedButton(
-                                        onClick = { hasMediaError = false },
-                                        shape = RoundedCornerShape(10.dp)
-                                    ) {
-                                        Text("Reintentar", fontSize = 12.sp, color = ThemeManager.textColor)
-                                    }
+                        if (signDefinition != null) {
+                            SignVideoPlayer(
+                                signDef = signDefinition,
+                                isPlaying = isPlaying,
+                                onVideoEnded = {
+                                    // Al terminar el video, opcionalmente puedes pausar o dejar listo
                                 }
-                            } else if (rawResourceId != 0) {
-                                AndroidView(
-                                    factory = { ctx ->
-                                        VideoView(ctx).apply {
-                                            val videoUri = Uri.parse("android.resource://${ctx.packageName}/$rawResourceId")
-                                            setVideoURI(videoUri)
-                                            setOnPreparedListener { mp ->
-                                                mp.isLooping = true
-                                            }
-                                            setOnCompletionListener {
-                                                ProgressManager.markSignCompleted(currentUser?.uid, signDef.word)
-                                                StreakManager.recordLessonCompleted(currentUser?.uid)
-                                            }
-                                            setOnErrorListener { _, _, _ ->
-                                                hasMediaError = true
-                                                true
-                                            }
-                                        }
-                                    },
-                                    update = { videoView ->
-                                        if (isPlaying) {
-                                            if (!videoView.isPlaying) videoView.start()
-                                        } else {
-                                            if (videoView.isPlaying) videoView.pause()
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } else {
-                                Text(
-                                    text = signDef.displayWord,
-                                    fontSize = 28.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = ThemeManager.textColor
-                                )
-                            }
+                            )
+                        } else {
+                            Text(
+                                text = "Animación para: ${wordKey.uppercase()}",
+                                fontWeight = FontWeight.Bold,
+                                color = ThemeManager.textColor,
+                                fontSize = 16.sp
+                            )
                         }
+                    }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                    // Botones de control de reproducción (Pausa/Reproducir y Repetir)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Botón Pausa / Reproducir
+                        IconButton(
+                            onClick = { isPlaying = !isPlaying },
+                            modifier = Modifier
+                                .size(50.dp)
+                                .background(Color(0xFF7E57C2), shape = CircleShape)
                         ) {
-                            Button(
-                                onClick = { isPlaying = !isPlaying },
-                                shape = CircleShape,
-                                colors = ButtonDefaults.buttonColors(containerColor = ThemeManager.heroCardColor),
-                                modifier = Modifier.size(50.dp),
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    contentDescription = null,
-                                    tint = Color.White
-                                )
-                            }
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = "Pausar o Reproducir",
+                                tint = Color.White
+                            )
+                        }
 
-                            Spacer(modifier = Modifier.width(20.dp))
-
-                            Button(
-                                onClick = {
-                                    isPlaying = false
-                                    hasMediaError = false
-                                    isPlaying = true
-                                },
-                                shape = CircleShape,
-                                colors = ButtonDefaults.buttonColors(containerColor = SigniaBluePrimary),
-                                modifier = Modifier.size(50.dp),
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Replay,
-                                    contentDescription = "Repetir",
-                                    tint = Color.White
-                                )
-                            }
+                        // Botón Repetir / Reiniciar animación
+                        IconButton(
+                            onClick = {
+                                isPlaying = false
+                                restartTrigger++
+                                isPlaying = true
+                            },
+                            modifier = Modifier
+                                .size(50.dp)
+                                .background(SigniaBluePrimary, shape = CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Repetir animación",
+                                tint = Color.White
+                            )
                         }
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            // Tarjeta con la Descripción del movimiento y Pasos
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = ThemeManager.cardBackgroundColor)
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp)
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            text = "Descripción del movimiento:",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = ThemeManager.textColor
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = signDef.description,
-                            fontSize = 13.sp,
-                            color = ThemeManager.subtextColor,
-                            lineHeight = 18.sp
-                        )
+                    Text(
+                        text = "Descripción del movimiento:",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = SigniaBluePrimary
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Realiza el movimiento fluido y constante para representar '${wordKey.lowercase()}' frente a ti.",
+                        fontSize = 14.sp,
+                        color = ThemeManager.subtextColor
+                    )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                        Text(
-                            text = "Pasos para realizar la seña:",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = ThemeManager.textColor
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Pasos para realizar la seña:",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = SigniaBluePrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                        signDef.gestureSteps.forEach { step ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.Top
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = SigniaBluePrimary,
-                                    modifier = Modifier.size(16.dp).padding(top = 2.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = step,
-                                    fontSize = 13.sp,
-                                    color = ThemeManager.textColor,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "1. Posicionar las manos en la postura inicial", fontSize = 13.sp, color = ThemeManager.textColor)
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "2. Ejecutar la seña siguiendo la animación guía", fontSize = 13.sp, color = ThemeManager.textColor)
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-                val isAlreadyCompleted = ProgressManager.completedSignsList.contains(signDef.word.lowercase())
-
+            // Botones de acción inferior (Progreso y Práctica con IA)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Botón para registrar la seña como aprendida
                 Button(
                     onClick = {
-                        ProgressManager.markSignCompleted(currentUser?.uid, signDef.word)
-                        StreakManager.recordLessonCompleted(currentUser?.uid) { newStreak ->
-                            android.widget.Toast.makeText(
-                                context,
-                                "¡Seña aprendida! Racha actual: $newStreak días 🔥",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        isLearned = true
+                        ProgressManager.markSignCompleted(currentUser?.uid, wordKey)
+                        Toast.makeText(
+                            context,
+                            "¡Seña registrada como aprendida en tu progreso!",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isAlreadyCompleted) SigniaBluePrimary else ThemeManager.heroCardColor
+                        containerColor = if (isLearned) Color(0xFF2E7D32) else SigniaBluePrimary
                     )
                 ) {
-                    Icon(
-                        imageVector = if (isAlreadyCompleted) Icons.Default.CheckCircle else Icons.Default.Check,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isAlreadyCompleted) "Seña Aprendida ✓" else "Marcar Seña como Aprendida",
+                        text = if (isLearned) "¡Seña Aprendida ✔!" else "Marcar como Seña Aprendida",
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 15.sp
+                        fontSize = 15.sp,
+                        color = Color.White
                     )
                 }
 
-                Spacer(modifier = Modifier.height(30.dp))
+                // Botón para abrir la práctica con la cámara y la IA (RF16)
+                OutlinedButton(
+                    onClick = {
+                        navController.navigate("aprende_camera_practice/$wordKey")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = SigniaBluePrimary)
+                ) {
+                    Icon(Icons.Default.Videocam, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Practicar con Cámara e IA 🔥",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

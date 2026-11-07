@@ -2,7 +2,6 @@ package com.example.app_signia
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
@@ -42,9 +41,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,14 +55,13 @@ import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import kotlinx.coroutines.delay
-import java.io.File
 import java.util.Locale
 
 /**
  * CÁMARA DE RECONOCIMIENTO Y DETALLES DE TRADUCCIÓN (CÁMARA 2 - MODALIDAD ASISTIDA)
  *
  * Flujo en 2 pasos:
- * 1. Escaneo inicial con cámara, guías de mano en azul SIGNIA y validación de presencia.
+ * 1. Escaneo inicial con cámara, guías de mano en azul SIGNIA y validación de presencia/RF5.
  * 2. Detalles de Seña Detectada con animación de IA MediaPipe y reproducción de voz.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,7 +94,7 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
     var cameraControlInstance by remember { mutableStateOf<Camera?>(null) }
 
     // Estados dinámicos de IA MediaPipe
-    var currentDetectedWord by remember { mutableStateOf("Hola") }
+    var currentDetectedWord by remember { mutableStateOf("Buscando manos...") }
     var isHandPresent by remember { mutableStateOf(false) }
     var allHandsLandmarksList by remember { mutableStateOf<List<List<NormalizedLandmark>>>(emptyList()) }
 
@@ -138,14 +134,14 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
     }
 
     fun speakWord(text: String) {
-        if (text.isNotBlank() && text != "Buscando manos...") {
+        if (text.isNotBlank() && text != "Buscando manos..." && text != "Seña no registrada") {
             isTtsSpeaking = true
             val params = Bundle()
             textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, params, "signia_tts_utterance_id")
         }
     }
 
-    // Helper de IA MediaPipe HandLandmarker (Reconocimiento de AMBAS MANOS)
+    // Helper de IA MediaPipe HandLandmarker con validación RF5 contra el diccionario oficial
     val handLandmarkerHelper = remember {
         HandLandmarkerHelper(
             context = context,
@@ -153,14 +149,26 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                 isHandPresent = keypoints > 0
                 allHandsLandmarksList = allHands
 
-                if (keypoints > 0 && word != "Buscando manos...") {
-                    currentDetectedWord = word
+                if (keypoints > 0) {
+                    val cleanWord = word.trim()
 
-                    if (isRecording) {
-                        if (recordedSigns.isEmpty() || recordedSigns.last() != word) {
-                            recordedSigns.add(word)
+                    // Verificamos si la seña detectada existe en el diccionario oficial de la app
+                    val isValidSign = SignDictionary.dictionary.containsKey(cleanWord.lowercase()) ||
+                            SignDictionary.dictionary.values.any { it.displayWord.equals(cleanWord, ignoreCase = true) }
+
+                    if (cleanWord.isNotBlank() && cleanWord != "Buscando manos..." && cleanWord != "Seña no registrada" && isValidSign) {
+                        currentDetectedWord = cleanWord
+
+                        if (isRecording) {
+                            if (recordedSigns.isEmpty() || recordedSigns.last() != cleanWord) {
+                                recordedSigns.add(cleanWord)
+                            }
                         }
+                    } else {
+                        currentDetectedWord = "Seña no registrada"
                     }
+                } else {
+                    currentDetectedWord = "Buscando manos..."
                 }
             },
             onError = { _ -> }
@@ -218,7 +226,7 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                             modifier = Modifier.size(28.dp)
                         )
                         Text(
-                            text = "Traducción de señas ",
+                            text = "Traducción de señas",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = ThemeManager.textColor
@@ -416,7 +424,7 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                                 }
                             }
 
-                            // CANVA PARA DIBUJAR AMBAS MANOS EN TIEMPO REAL
+                            // CANVAS PARA DIBUJAR AMBAS MANOS EN TIEMPO REAL
                             if (allHandsLandmarksList.isNotEmpty()) {
                                 Canvas(modifier = Modifier.fillMaxSize()) {
                                     val width = size.width
@@ -532,7 +540,39 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(18.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // FEEDBACK VISUAL EN TIEMPO REAL (RF5 - Seña no reconocida / Advertencia)
+                        val isError = currentDetectedWord == "Seña no registrada"
+                        val feedbackColor = if (isError) Color(0xFFE53935) else SigniaBluePrimary
+
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = ThemeManager.cardBackgroundColor,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = if (isError) Icons.Default.Warning else Icons.Default.PanTool,
+                                    contentDescription = null,
+                                    tint = feedbackColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = if (isError) "Seña no reconocida. ¡Inténtalo de nuevo!" else "Detectado: \"$currentDetectedWord\"",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = ThemeManager.textColor,
+                                    textAlign = TextAlign.Start
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         // BARRA DE ACCIÓN: BOTÓN GRABAR Y CAMBIO DE CÁMARA
                         Row(

@@ -91,6 +91,18 @@ class MainActivity : ComponentActivity() {
                         }
                         // ==========================================
 
+                        // ==========================================
+                        // RUTA: RF16 (Práctica con Cámara e IA)
+                        // ==========================================
+                        composable(
+                            route = "aprende_camera_practice/{word}",
+                            arguments = listOf(navArgument("word") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val word = backStackEntry.arguments?.getString("word") ?: ""
+                                AprendeCameraPracticeScreen(navController = navController, targetWord = word)
+                        }
+                        // ==========================================
+
                         composable("perfil") {
                             PerfilScreen(navController = navController)
                         }
