@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "595956443369",
+    "project_id": "signia-app-802d0",
+    "storage_bucket": "signia-app-802d0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595956443369:android:a977459718de7a05e82878",
+        "android_client_info": {
+          "package_name": "com.example.app_signia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "595956443369-rij5uotdcso5o3u3dvuah1djqkj0vpvr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.app_signia",
+            "certificate_hash": "92956cb7272e0ddccff6ff9ed0e2f5f2ee1e6984"
+          }
+        },
+        {
+          "client_id": "595956443369-4v6h2e2ltlt96p3vir3uuvqj0ht3u6f8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5t5X-ZtwZVhWfouqPdcYUQJl6-xZgZFQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "595956443369-4v6h2e2ltlt96p3vir3uuvqj0ht3u6f8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
