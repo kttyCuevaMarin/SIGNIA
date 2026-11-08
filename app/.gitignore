@@ -1,6 +1,7 @@
 /build/
 /app/build/
 /.gradle/
-*.html
 .idea/
+*.html
+.kotlin/
 local.properties
