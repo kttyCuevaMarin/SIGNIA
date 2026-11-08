@@ -1,0 +1,15 @@
+# Archivos generados
+build/
+**/build/
+.gradle/
+.kotlin/
+
+# Android Studio
+.idea/
+*.iml
+
+# Configuracion local
+local.properties
+
+# Archivos HTML
+*.html
