@@ -141,6 +141,10 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
         }
     }
 
+    // Filtro de estabilidad temporal para evitar saltos prematuros
+    var pendingGestureWord by remember { mutableStateOf("") }
+    var consecutiveFramesCount by remember { mutableIntStateOf(0) }
+
     // Helper de IA MediaPipe HandLandmarker con validación RF5 contra el diccionario oficial
     val handLandmarkerHelper = remember {
         HandLandmarkerHelper(
@@ -149,26 +153,34 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                 isHandPresent = keypoints > 0
                 allHandsLandmarksList = allHands
 
-                if (keypoints > 0) {
+                if (keypoints == 0 || word == "Buscando manos..." || word == "Seña no registrada") {
+                    consecutiveFramesCount = 0
+                    pendingGestureWord = ""
+                    currentDetectedWord = if (keypoints == 0) "Buscando manos..." else "Seña no registrada"
+                } else {
                     val cleanWord = word.trim()
-
-                    // Verificamos si la seña detectada existe en el diccionario oficial de la app
                     val isValidSign = SignDictionary.dictionary.containsKey(cleanWord.lowercase()) ||
                             SignDictionary.dictionary.values.any { it.displayWord.equals(cleanWord, ignoreCase = true) }
 
-                    if (cleanWord.isNotBlank() && cleanWord != "Buscando manos..." && cleanWord != "Seña no registrada" && isValidSign) {
-                        currentDetectedWord = cleanWord
+                    if (isValidSign) {
+                        if (cleanWord == pendingGestureWord) {
+                            consecutiveFramesCount++
+                        } else {
+                            pendingGestureWord = cleanWord
+                            consecutiveFramesCount = 1
+                        }
 
-                        if (isRecording) {
-                            if (recordedSigns.isEmpty() || recordedSigns.last() != cleanWord) {
-                                recordedSigns.add(cleanWord)
+                        if (consecutiveFramesCount >= 2) {
+                            currentDetectedWord = cleanWord
+                            if (isRecording) {
+                                if (recordedSigns.isEmpty() || recordedSigns.last() != cleanWord) {
+                                    recordedSigns.add(cleanWord)
+                                }
                             }
                         }
                     } else {
                         currentDetectedWord = "Seña no registrada"
                     }
-                } else {
-                    currentDetectedWord = "Buscando manos..."
                 }
             },
             onError = { _ -> }
@@ -416,7 +428,7 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                                 ) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = if (isRecording) "● Grabando en vivo..." else if (isHandPresent) "Manos detectadas con IA" else "Cámara activa (IA lista)",
+                                        text = if (isRecording) "● Grabando en vivo..." else if (isHandPresent) "Manos detectadas con IA" else "Muestra las manos a la cámara",
                                         color = SigniaWhite,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold
@@ -424,41 +436,50 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                                 }
                             }
 
-                            // CANVAS PARA DIBUJAR AMBAS MANOS EN TIEMPO REAL
+                            // CANVAS PARA DIBUJAR AMBAS MANOS EN TIEMPO REAL (Estilo Python MediaPipe)
                             if (allHandsLandmarksList.isNotEmpty()) {
                                 Canvas(modifier = Modifier.fillMaxSize()) {
                                     val width = size.width
                                     val height = size.height
 
+                                    val fingerColorMap = mapOf(
+                                        Pair(0, 1) to Color(0xFFFFCC80), Pair(1, 2) to Color(0xFFFFCC80), Pair(2, 3) to Color(0xFFFFCC80), Pair(3, 4) to Color(0xFFFFCC80),
+                                        Pair(0, 5) to Color(0xFFB0BEC5), Pair(5, 6) to Color(0xFF2196F3), Pair(6, 7) to Color(0xFF2196F3), Pair(7, 8) to Color(0xFF2196F3),
+                                        Pair(5, 9) to Color(0xFFB0BEC5), Pair(9, 10) to Color(0xFF4CAF50), Pair(10, 11) to Color(0xFF4CAF50), Pair(11, 12) to Color(0xFF4CAF50),
+                                        Pair(9, 13) to Color(0xFFB0BEC5), Pair(13, 14) to Color(0xFFFFEE58), Pair(14, 15) to Color(0xFFFFEE58), Pair(15, 16) to Color(0xFFFFEE58),
+                                        Pair(13, 17) to Color(0xFFB0BEC5), Pair(17, 18) to Color(0xFFAB47BC), Pair(18, 19) to Color(0xFFAB47BC), Pair(19, 20) to Color(0xFFAB47BC),
+                                        Pair(0, 17) to Color(0xFFB0BEC5)
+                                    )
+
                                     allHandsLandmarksList.forEach { handLandmarks ->
-                                        handLandmarks.forEach { landmark ->
+                                        handLandmarks.forEachIndexed { idx, landmark ->
                                             val x = landmark.x() * width
                                             val y = landmark.y() * height
+                                            val dotColor = when (idx) {
+                                                in 1..4 -> Color(0xFFFFCC80)
+                                                in 5..8 -> Color(0xFF2196F3)
+                                                in 9..12 -> Color(0xFF4CAF50)
+                                                in 13..16 -> Color(0xFFFFEE58)
+                                                in 17..20 -> Color(0xFFAB47BC)
+                                                else -> Color(0xFFE53935)
+                                            }
                                             drawCircle(
-                                                color = Color(0xFF00E5FF),
+                                                color = dotColor,
                                                 radius = 7f,
                                                 center = Offset(x, y)
                                             )
                                         }
 
-                                        val connections = listOf(
-                                            Pair(0, 1), Pair(1, 2), Pair(2, 3), Pair(3, 4),
-                                            Pair(0, 5), Pair(5, 6), Pair(6, 7), Pair(7, 8),
-                                            Pair(5, 9), Pair(9, 10), Pair(10, 11), Pair(11, 12),
-                                            Pair(9, 13), Pair(13, 14), Pair(14, 15), Pair(15, 16),
-                                            Pair(13, 17), Pair(17, 18), Pair(18, 19), Pair(19, 20),
-                                            Pair(0, 17)
-                                        )
-
-                                        connections.forEach { (startIdx, endIdx) ->
+                                        fingerColorMap.forEach { (pair, color) ->
+                                            val (startIdx, endIdx) = pair
                                             if (startIdx < handLandmarks.size && endIdx < handLandmarks.size) {
                                                 val start = handLandmarks[startIdx]
                                                 val end = handLandmarks[endIdx]
                                                 drawLine(
-                                                    color = Color.White,
+                                                    color = color,
                                                     start = Offset(start.x() * width, start.y() * height),
                                                     end = Offset(end.x() * width, end.y() * height),
-                                                    strokeWidth = 3f
+                                                    strokeWidth = 3.5f
                                                 )
                                             }
                                         }
@@ -636,7 +657,10 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                                 Spacer(modifier = Modifier.height(6.dp))
 
                                 Text(
-                                    text = if (isRecording) "Detener y Traducir" else "Iniciar Reconocimiento",
+                                    text =
+                                        if (isRecording)
+                                            "Detener y Traducir"
+                                        else "Iniciar Reconocimiento",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = ThemeManager.textColor

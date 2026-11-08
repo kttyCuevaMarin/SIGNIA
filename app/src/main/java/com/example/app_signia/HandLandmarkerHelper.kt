@@ -70,8 +70,8 @@ class HandLandmarkerHelper(
     fun detectLiveStream(imageProxy: ImageProxy, isFrontCamera: Boolean) {
         val currentTime = SystemClock.uptimeMillis()
 
-        // THROTTLING OPTIMIZADO (~7 FPS DE IA) PARA ELIMINAR EL LAG Y CONGELAMIENTOS DE MEMORIA
-        if (currentTime - lastInferenceTime < 140L) {
+        // THROTTLING MÁS ESTRICTO (~2.2 FPS DE IA, 450ms) PARA GARANTIZAR CÁMARA 100% FLUIDA SIN NINGÚN CONGELAMIENTO
+        if (currentTime - lastInferenceTime < 450L) {
             imageProxy.close()
             return
         }
@@ -92,18 +92,22 @@ class HandLandmarkerHelper(
                 bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
             )
 
-            // Reducir tamaño a 224x224 una sola vez para que no consuma memoria excesiva
-            val smallBitmap = Bitmap.createScaledBitmap(rotatedBitmap, 224, 224, false)
+            // Redimensionar a 320x320 para que MediaPipe e IA vuelen instantáneamente sin afectar la cámara
+            val smallBitmap = Bitmap.createScaledBitmap(rotatedBitmap, 320, 320, false)
 
             val oldBitmap = latestBitmap
             latestBitmap = smallBitmap
 
-            // Reciclar el bitmap antiguo para evitar congelamientos por Garbage Collector
             if (oldBitmap != null && !oldBitmap.isRecycled && oldBitmap != smallBitmap) {
                 oldBitmap.recycle()
             }
 
-            val mpImage = BitmapImageBuilder(rotatedBitmap).build()
+            // Reciclar rotatedBitmap grande para liberar memoria de inmediato
+            if (rotatedBitmap != smallBitmap && !rotatedBitmap.isRecycled) {
+                rotatedBitmap.recycle()
+            }
+
+            val mpImage = BitmapImageBuilder(smallBitmap).build()
 
             if (handLandmarker != null) {
                 handLandmarker?.detectAsync(mpImage, currentTime)
@@ -123,22 +127,27 @@ class HandLandmarkerHelper(
         var displayWord = "Buscando manos..."
         var confidence = 0
 
-        // 1. CLASIFICACIÓN ULTRA RÁPIDA CON TEACHABLE MACHINE (.TFLITE)
-        if (bitmap != null && !bitmap.isRecycled && teachableMachineClassifier != null) {
+        // 1. CLASIFICACIÓN GEOMÉTRICA DE ALTA PRECISIÓN (HandGestureClassifier - Prioritaria)
+        if (allHands.isNotEmpty()) {
+            val geometricWord = HandGestureClassifier.classifyMultipleHands(allHands)
+            if (geometricWord != "Seña no registrada" && geometricWord != "Buscando manos...") {
+                displayWord = geometricWord
+                confidence = 94
+            }
+        }
+
+        // 2. FALLBACK AL MODELO TFLITE (.TFLITE) SI EL GEOMÉTRICO NO DETECTÓ
+        if (displayWord == "Buscando manos..." && bitmap != null && !bitmap.isRecycled && teachableMachineClassifier != null) {
             val tmResult = teachableMachineClassifier!!.classify(bitmap)
-            if (tmResult.word != "Seña no registrada" && tmResult.confidencePercentage > 35) {
+            if (tmResult.word != "Seña no registrada" && tmResult.confidencePercentage > 30) {
                 displayWord = tmResult.word
                 confidence = tmResult.confidencePercentage
             }
         }
 
-        // 2. FALLBACK AL CLASIFICADOR GEOMÉTRICO SI HAY MANOS Y TEACHABLE MACHINE NO DETECTÓ
-        if (displayWord == "Buscando manos..." && allHands.isNotEmpty()) {
-            val fallbackWord = HandGestureClassifier.classifyMultipleHands(allHands)
-            if (fallbackWord != "Seña no registrada" && fallbackWord != "Buscando manos...") {
-                displayWord = fallbackWord
-                confidence = 88
-            }
+        if (allHands.isEmpty()) {
+            displayWord = "Buscando manos..."
+            confidence = 0
         }
 
         onResults(result, displayWord, totalKeypoints, confidence, allHands)

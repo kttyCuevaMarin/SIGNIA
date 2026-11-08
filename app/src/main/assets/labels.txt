@@ -1,7 +1,7 @@
 0 papa
-1 porfavor
-2 uno
+1 Porfavor
+2 Uno
 3 ayuda
-4 ningubo
-5 hola
-6 comoEstas
+4 ninuguno
+5 HOLA
+6 ComoEstas

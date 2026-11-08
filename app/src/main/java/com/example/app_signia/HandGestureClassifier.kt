@@ -76,25 +76,25 @@ object HandGestureClassifier {
         // 2. TAMAÑO NORMALIZADO DE LA PALMA (Invariancia a la distancia de la cámara)
         val palmSize = dist(wrist, middleMcp).coerceAtLeast(0.001)
 
-        // 3. EXTENSIÓN RELATIVA Y RIGUROSA DE CADA DEDO
+        // 3. EXTENSIÓN RELATIVA Y RIGUROSA DE CADA DEDO (Optimizado para mayor fluidez)
         val indexExtension = dist(indexTip, wrist) / dist(indexMcp, wrist)
         val middleExtension = dist(middleTip, wrist) / dist(middleMcp, wrist)
         val ringExtension = dist(ringTip, wrist) / dist(ringMcp, wrist)
         val pinkyExtension = dist(pinkyTip, wrist) / dist(pinkyMcp, wrist)
 
-        // Límites estrictos para considerar un dedo extendido o dobaldo
-        val isIndexExtended = indexExtension > 1.25
-        val isMiddleExtended = middleExtension > 1.25
-        val isRingExtended = ringExtension > 1.25
-        val isPinkyExtended = pinkyExtension > 1.25
+        // Límites optimizados para reconocer con mayor facilidad
+        val isIndexExtended = indexExtension > 1.15
+        val isMiddleExtended = middleExtension > 1.15
+        val isRingExtended = ringExtension > 1.15
+        val isPinkyExtended = pinkyExtension > 1.15
 
-        val isIndexFolded = indexExtension < 1.12
-        val isMiddleFolded = middleExtension < 1.12
-        val isRingFolded = ringExtension < 1.12
-        val isPinkyFolded = pinkyExtension < 1.12
+        val isIndexFolded = indexExtension < 1.18
+        val isMiddleFolded = middleExtension < 1.18
+        val isRingFolded = ringExtension < 1.18
+        val isPinkyFolded = pinkyExtension < 1.18
 
         val thumbDistToPinky = dist(thumbTip, pinkyMcp) / palmSize
-        val isThumbExtended = thumbDistToPinky > 0.80
+        val isThumbExtended = thumbDistToPinky > 0.75
 
         val indexThumbDist = dist(indexTip, thumbTip) / palmSize
         val middleThumbDist = dist(middleTip, thumbTip) / palmSize
@@ -104,25 +104,25 @@ object HandGestureClassifier {
         // 4. CLASIFICACIÓN DE ALTA PRECISIÓN DE CADA GESTO
         val signKey = when {
             // 1. SEÑA "PAPA" (Papá): Pulgar/mano tocando la sien o frente de forma elevada
-            isThumbExtended && handHeightFromWrist > 0.24f && thumbTip.y() < indexMcp.y() -> "papa"
+            isThumbExtended && handHeightFromWrist > 0.20f && thumbTip.y() < indexMcp.y() -> "papa"
 
-            // 2. SEÑA "AYUDA" (Ayuda): Pulgar arriba con todos los demás 4 dedos firmemente empuñados
+            // 2. SEÑA "AYUDA" (Ayuda): Pulgar arriba con todos los demás 4 dedos firmemente empuñados (Cerrados)
             isThumbExtended && thumbTip.y() < wrist.y() && isIndexFolded && isMiddleFolded && isRingFolded && isPinkyFolded -> "ayuda"
 
             // 3. SEÑA "UNO" (Uno): Únicamente el dedo índice extendido hacia arriba
             isIndexExtended && isMiddleFolded && isRingFolded && isPinkyFolded -> "uno"
 
             // 4. SEÑA "PORFAVOR" (Por favor): Mano plana inclinada sobre el pecho/centro
-            isIndexExtended && isMiddleExtended && isRingExtended && isPinkyExtended && indexTip.y() > wrist.y() - 0.10f -> "porfavor"
+            isIndexExtended && isMiddleExtended && isRingExtended && isPinkyExtended && indexTip.y() > wrist.y() - 0.15f -> "porfavor"
 
             // 5. SEÑA "GRACIAS" (Gracias): Mano plana extendida horizontalmente desde el mentón
-            isIndexExtended && isMiddleExtended && isRingExtended && isPinkyExtended && (indexTip.y() > indexMcp.y() - 0.08f) -> "gracias"
+            isIndexExtended && isMiddleExtended && isRingExtended && isPinkyExtended && (indexTip.y() > indexMcp.y() - 0.12f) -> "gracias"
 
-            // 6. SEÑA "HOLA" (Hola): Mano abierta y elevada con los 5 dedos extendidos
-            isIndexExtended && isMiddleExtended && isRingExtended && isPinkyExtended && isThumbExtended -> "hola"
+            // 6. SEÑA "HOLA" (Hola): Mano abierta con los 4 dedos principales extendidos (Exclusivo para evitar confusión con Ayuda)
+            isIndexExtended && isMiddleExtended && isRingExtended && isPinkyExtended -> "hola"
 
             // 7. SEÑAS "NO" y "SI"
-            indexThumbDist < 0.35 && middleThumbDist < 0.35 && isRingFolded && isPinkyFolded -> "no"
+            indexThumbDist < 0.40 && middleThumbDist < 0.40 && isRingFolded && isPinkyFolded -> "no"
             isIndexFolded && isMiddleFolded && isRingFolded && isPinkyFolded && !isThumbExtended -> "si"
 
             else -> "desconocido"

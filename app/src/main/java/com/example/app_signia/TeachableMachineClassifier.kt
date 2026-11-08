@@ -7,23 +7,38 @@ import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.imageclassifier.ImageClassifier
 import com.google.mediapipe.tasks.vision.imageclassifier.ImageClassifier.ImageClassifierOptions
+import java.util.Locale
 
 data class RecognitionResult(
     val word: String,
-    val confidencePercentage: Int
+    val confidencePercentage: Int,
+    val exactConfidenceStr: String = "0.0"
 )
 
 /**
- * CLASIFICADOR DE INTELIGENCIA ARTIFICIAL BASADO EN TEACHABLE MACHINE (MEDIAPIPE TASKS VISION)
- * Carga el modelo `model_unquant.tflite` desde assets para predecir la seña en tiempo real
- * con su porcentaje de confianza real (0-100%).
+ * CLASIFICADOR DE INTELIGENCIA ARTIFICIAL TFLITE / TEACHABLE MACHINE
+ * Carga `model_unquant.tflite` y `labels.txt` desde assets de forma idéntica al script de Python.
  */
 class TeachableMachineClassifier(private val context: Context) {
 
     private var imageClassifier: ImageClassifier? = null
+    private var labels: List<String> = emptyList()
 
     init {
+        loadLabels()
         setupClassifier()
+    }
+
+    private fun loadLabels() {
+        try {
+            context.assets.open("labels.txt").bufferedReader().use { reader ->
+                labels = reader.readLines().map { it.trim() }.filter { it.isNotEmpty() }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Fallback por defecto si no se puede leer labels.txt
+            labels = listOf("0 papa", "1 Porfavor", "2 Uno", "3 ayuda", "4 ninuguno", "5 HOLA", "6 ComoEstas")
+        }
     }
 
     private fun setupClassifier() {
@@ -52,8 +67,8 @@ class TeachableMachineClassifier(private val context: Context) {
     }
 
     fun classify(bitmap: Bitmap): RecognitionResult {
-        val classifier = imageClassifier ?: return RecognitionResult("Seña no registrada", 0)
-        if (bitmap.isRecycled) return RecognitionResult("Seña no registrada", 0)
+        val classifier = imageClassifier ?: return RecognitionResult("Seña no registrada", 0, "0.0")
+        if (bitmap.isRecycled) return RecognitionResult("Seña no registrada", 0, "0.0")
 
         try {
             val mpImage = BitmapImageBuilder(bitmap).build()
@@ -61,34 +76,41 @@ class TeachableMachineClassifier(private val context: Context) {
 
             val classificationResult = results.classificationResult()
             if (classificationResult.classifications().isEmpty()) {
-                return RecognitionResult("Seña no registrada", 0)
+                return RecognitionResult("Seña no registrada", 0, "0.0")
             }
 
             val categories = classificationResult.classifications()[0].categories()
             if (categories.isEmpty()) {
-                return RecognitionResult("Seña no registrada", 0)
+                return RecognitionResult("Seña no registrada", 0, "0.0")
             }
 
             val topCategory = categories[0]
             val score = topCategory.score() // 0.0f a 1.0f
             val confidencePct = (score * 100).toInt().coerceIn(0, 100)
+            val exactConfStr = String.format(Locale.US, "%.1f", score * 100)
 
-            if (score < 0.40f) {
-                return RecognitionResult("Seña no registrada", confidencePct)
+            if (score < 0.35f) {
+                return RecognitionResult("Seña no registrada", confidencePct, exactConfStr)
             }
 
-            val rawCategoryName = topCategory.categoryName() ?: topCategory.displayName() ?: ""
-            val displayWord = mapLabelToDisplayWord(rawCategoryName)
+            val index = topCategory.index()
+            val rawLabel = if (index >= 0 && index < labels.size) {
+                labels[index]
+            } else {
+                topCategory.categoryName() ?: topCategory.displayName() ?: ""
+            }
 
-            return RecognitionResult(displayWord, confidencePct)
+            val displayWord = mapLabelToDisplayWord(rawLabel)
+
+            return RecognitionResult(displayWord, confidencePct, exactConfStr)
         } catch (e: Exception) {
             e.printStackTrace()
-            return RecognitionResult("Seña no registrada", 0)
+            return RecognitionResult("Seña no registrada", 0, "0.0")
         }
     }
 
     private fun mapLabelToDisplayWord(rawLabel: String): String {
-        // Formato en labels.txt: "0 papa", "1 porfavor", "2 uno", "3 ayuda", "4 ningubo", "5 hola", "6 comoEstas"
+        // Formato en labels.txt: "0 papa", "1 Porfavor", "2 Uno", "3 ayuda", "4 ninuguno", "5 HOLA", "6 ComoEstas"
         val cleanLabel = rawLabel.lowercase().replace(Regex("^[0-9]+\\s*"), "").trim()
         return when (cleanLabel) {
             "hola" -> "Hola"
@@ -98,7 +120,7 @@ class TeachableMachineClassifier(private val context: Context) {
             "papa", "papá" -> "Papá"
             "uno" -> "Uno"
             "comoestas", "como_estas", "como estas" -> "¿Cómo estás?"
-            "ningubo", "ninguno", "fondo", "nada" -> "Seña no registrada"
+            "ninuguno", "ninguno", "fondo", "nada" -> "Seña no registrada"
             else -> cleanLabel.ifEmpty { rawLabel }.replaceFirstChar { it.uppercase() }
         }
     }

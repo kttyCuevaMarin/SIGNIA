@@ -399,7 +399,7 @@ fun SignScanDetailsScreen(navController: NavController) {
                             Surface(
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
-                                    .padding(top = 36.dp),
+                                    .padding(top = 327.dp),
                                 shape = RoundedCornerShape(20.dp),
                                 color = if (!isHandPresent) SigniaBluePrimary.copy(alpha = 0.90f) else Color.Black.copy(alpha = 0.55f)
                             ) {
@@ -407,15 +407,9 @@ fun SignScanDetailsScreen(navController: NavController) {
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = if (!isHandPresent) Icons.Default.PanTool else Icons.Default.CheckCircle,
-                                        contentDescription = null,
-                                        tint = SigniaWhite,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.height(20.dp))
                                     Text(
-                                        text = if (isRecording) "● Grabando en vivo..." else if (isHandPresent) "Manos detectadas con IA" else "Cámara activa (IA lista)",
+                                        text = if (isRecording) "● Grabando en vivo..." else if (isHandPresent) "Manos detectadas con IA" else "Muestra las manos a la cámara",
                                         color = SigniaWhite,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold
@@ -428,35 +422,44 @@ fun SignScanDetailsScreen(navController: NavController) {
                                     val width = size.width
                                     val height = size.height
 
+                                    val fingerColorMap = mapOf(
+                                        Pair(0, 1) to Color(0xFFFFCC80), Pair(1, 2) to Color(0xFFFFCC80), Pair(2, 3) to Color(0xFFFFCC80), Pair(3, 4) to Color(0xFFFFCC80),
+                                        Pair(0, 5) to Color(0xFFB0BEC5), Pair(5, 6) to Color(0xFF2196F3), Pair(6, 7) to Color(0xFF2196F3), Pair(7, 8) to Color(0xFF2196F3),
+                                        Pair(5, 9) to Color(0xFFB0BEC5), Pair(9, 10) to Color(0xFF4CAF50), Pair(10, 11) to Color(0xFF4CAF50), Pair(11, 12) to Color(0xFF4CAF50),
+                                        Pair(9, 13) to Color(0xFFB0BEC5), Pair(13, 14) to Color(0xFFFFEE58), Pair(14, 15) to Color(0xFFFFEE58), Pair(15, 16) to Color(0xFFFFEE58),
+                                        Pair(13, 17) to Color(0xFFB0BEC5), Pair(17, 18) to Color(0xFFAB47BC), Pair(18, 19) to Color(0xFFAB47BC), Pair(19, 20) to Color(0xFFAB47BC),
+                                        Pair(0, 17) to Color(0xFFB0BEC5)
+                                    )
+
                                     allHandsLandmarksList.forEach { handLandmarks ->
-                                        handLandmarks.forEach { landmark ->
+                                        handLandmarks.forEachIndexed { idx, landmark ->
                                             val x = landmark.x() * width
                                             val y = landmark.y() * height
+                                            val dotColor = when (idx) {
+                                                in 1..4 -> Color(0xFFFFCC80)
+                                                in 5..8 -> Color(0xFF2196F3)
+                                                in 9..12 -> Color(0xFF4CAF50)
+                                                in 13..16 -> Color(0xFFFFEE58)
+                                                in 17..20 -> Color(0xFFAB47BC)
+                                                else -> Color(0xFFE53935)
+                                            }
                                             drawCircle(
-                                                color = Color(0xFF00E5FF),
+                                                color = dotColor,
                                                 radius = 7f,
                                                 center = Offset(x, y)
                                             )
                                         }
 
-                                        val connections = listOf(
-                                            Pair(0, 1), Pair(1, 2), Pair(2, 3), Pair(3, 4),
-                                            Pair(0, 5), Pair(5, 6), Pair(6, 7), Pair(7, 8),
-                                            Pair(5, 9), Pair(9, 10), Pair(10, 11), Pair(11, 12),
-                                            Pair(9, 13), Pair(13, 14), Pair(14, 15), Pair(15, 16),
-                                            Pair(13, 17), Pair(17, 18), Pair(18, 19), Pair(19, 20),
-                                            Pair(0, 17)
-                                        )
-
-                                        connections.forEach { (startIdx, endIdx) ->
+                                        fingerColorMap.forEach { (pair, color) ->
+                                            val (startIdx, endIdx) = pair
                                             if (startIdx < handLandmarks.size && endIdx < handLandmarks.size) {
                                                 val start = handLandmarks[startIdx]
                                                 val end = handLandmarks[endIdx]
                                                 drawLine(
-                                                    color = Color.White,
+                                                    color = color,
                                                     start = Offset(start.x() * width, start.y() * height),
                                                     end = Offset(end.x() * width, end.y() * height),
-                                                    strokeWidth = 3f
+                                                    strokeWidth = 3.5f
                                                 )
                                             }
                                         }
@@ -646,6 +649,7 @@ fun SignScanDetailsScreen(navController: NavController) {
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "No se guarda video, la IA procesa las señas en tiempo real",
                                 fontSize = 11.sp,

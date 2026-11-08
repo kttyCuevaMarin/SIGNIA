@@ -10,6 +10,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview as CameraXPreview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -36,11 +38,11 @@ import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import java.util.concurrent.Executors
 
 /**
- * RF16 - PRÁCTICA DE SEÑAS CON CÁMARA E IA
- * Versión estabilizada y corregida.
+ * RF16 - PRÁCTICA DE SEÑAS CON CÁMARA E IA (MEDIAPIPE + TEACHABLE MACHINE ESTABILIZADO)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +64,8 @@ fun AprendeCameraPracticeScreen(
     var detectedWord by remember { mutableStateOf("Buscando manos...") }
     var isSuccess by remember { mutableStateOf(false) }
     var keypointsCount by remember { mutableIntStateOf(0) }
+    var allHandsLandmarksList by remember { mutableStateOf<List<List<NormalizedLandmark>>>(emptyList()) }
+    var consecutiveMatches by remember { mutableIntStateOf(0) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -72,18 +76,12 @@ fun AprendeCameraPracticeScreen(
     }
 
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-
-    // Helper de MediaPipe optimizado con bandera para evitar procesar tras salir
     val isDestroyed = remember { mutableStateOf(false) }
 
-    // Función auxiliar para registrar progreso y racha de forma centralizada
     val registerSuccessProgress = {
         try {
             val userId = currentUser?.uid
-            // Marca la seña como completada en ProgressManager
             ProgressManager.markSignCompleted(userId, targetWord)
-
-            // Registra la lección completada para la racha diaria
             StreakManager.recordLessonCompleted(userId) { newStreak ->
                 try {
                     Toast.makeText(
@@ -103,29 +101,36 @@ fun AprendeCameraPracticeScreen(
     val handHelper = remember {
         HandLandmarkerHelper(
             context = context,
-            onResults = { _, rawWord, keypoints, _, _ ->
+            onResults = { _, rawWord, keypoints, _, allHands ->
                 if (!isDestroyed.value && !isSuccess) {
                     keypointsCount = keypoints
+                    allHandsLandmarksList = allHands
                     val cleanWord = rawWord.trim()
-                    detectedWord = if (cleanWord.isNotBlank()) cleanWord else "Mano detectada sin seña clara"
+                    detectedWord = if (cleanWord.isNotBlank() && cleanWord != "Seña no registrada") cleanWord else "Buscando manos..."
 
                     if (keypoints > 0) {
                         val matchesTarget = cleanWord.equals(targetWord.trim(), ignoreCase = true) ||
                                 cleanWord.contains(targetWord.trim(), ignoreCase = true)
 
-                        if (matchesTarget && !isSuccess) {
-                            isSuccess = true
-                            isDestroyed.value = true // Detiene futuros análisis al instante
-
-                            try {
-                                cameraExecutor.shutdown()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
+                        if (matchesTarget) {
+                            consecutiveMatches++
+                            // Exige 3 detecciones consecutivas estables para evitar falsos positivos prematuros
+                            if (consecutiveMatches >= 3 && !isSuccess) {
+                                isSuccess = true
+                                isDestroyed.value = true
+                                try {
+                                    cameraExecutor.shutdown()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                                registerSuccessProgress()
                             }
-
-                            // Registrar avance y racha
-                            registerSuccessProgress()
+                        } else {
+                            // Reinicia el contador si cambia de seña para evitar acumulación errónea
+                            if (consecutiveMatches > 0) consecutiveMatches--
                         }
+                    } else {
+                        consecutiveMatches = 0
                     }
                 }
             },
@@ -207,7 +212,7 @@ fun AprendeCameraPracticeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Visor de Cámara con IA
+            // Visor de Cámara con IA y Canvas de MediaPipe
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -256,6 +261,73 @@ fun AprendeCameraPracticeScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
+                // CANVAS PARA DIBUJAR PUNTOS CLAVE DE MEDIAPIPE EN TIEMPO REAL (Estilo Python MediaPipe)
+                if (allHandsLandmarksList.isNotEmpty()) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val width = size.width
+                        val height = size.height
+
+                        val fingerColorMap = mapOf(
+                            Pair(0, 1) to Color(0xFFFFCC80), Pair(1, 2) to Color(0xFFFFCC80), Pair(2, 3) to Color(0xFFFFCC80), Pair(3, 4) to Color(0xFFFFCC80),
+                            Pair(0, 5) to Color(0xFFB0BEC5), Pair(5, 6) to Color(0xFF2196F3), Pair(6, 7) to Color(0xFF2196F3), Pair(7, 8) to Color(0xFF2196F3),
+                            Pair(5, 9) to Color(0xFFB0BEC5), Pair(9, 10) to Color(0xFF4CAF50), Pair(10, 11) to Color(0xFF4CAF50), Pair(11, 12) to Color(0xFF4CAF50),
+                            Pair(9, 13) to Color(0xFFB0BEC5), Pair(13, 14) to Color(0xFFFFEE58), Pair(14, 15) to Color(0xFFFFEE58), Pair(15, 16) to Color(0xFFFFEE58),
+                            Pair(13, 17) to Color(0xFFB0BEC5), Pair(17, 18) to Color(0xFFAB47BC), Pair(18, 19) to Color(0xFFAB47BC), Pair(19, 20) to Color(0xFFAB47BC),
+                            Pair(0, 17) to Color(0xFFB0BEC5)
+                        )
+
+                        allHandsLandmarksList.forEach { handLandmarks ->
+                            handLandmarks.forEachIndexed { idx, landmark ->
+                                val x = landmark.x() * width
+                                val y = landmark.y() * height
+                                val dotColor = when (idx) {
+                                    in 1..4 -> Color(0xFFFFCC80)
+                                    in 5..8 -> Color(0xFF2196F3)
+                                    in 9..12 -> Color(0xFF4CAF50)
+                                    in 13..16 -> Color(0xFFFFEE58)
+                                    in 17..20 -> Color(0xFFAB47BC)
+                                    else -> Color(0xFFE53935)
+                                }
+                                drawCircle(
+                                    color = dotColor,
+                                    radius = 7f,
+                                    center = Offset(x, y)
+                                )
+                            }
+
+                            fingerColorMap.forEach { (pair, color) ->
+                                val (startIdx, endIdx) = pair
+                                if (startIdx < handLandmarks.size && endIdx < handLandmarks.size) {
+                                    val start = handLandmarks[startIdx]
+                                    val end = handLandmarks[endIdx]
+                                    drawLine(
+                                        color = color,
+                                        start = Offset(start.x() * width, start.y() * height),
+                                        end = Offset(end.x() * width, end.y() * height),
+                                        strokeWidth = 3.5f
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Indicador de estado superior
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(16.dp)
+                        .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = if (keypointsCount > 0) "Manos detectadas (IA activa)" else "Muestra las manos a la cámara",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 // Pantalla de éxito al acertar de forma segura
                 if (isSuccess) {
                     Box(
@@ -275,7 +347,7 @@ fun AprendeCameraPracticeScreen(
                             Spacer(modifier = Modifier.height(12.dp))
                             Text("¡Excelente! Seña Correcta", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("Progreso y racha actualizados 🔥", fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
+                            Text("Progreso y racha actualizados ", fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
                             Spacer(modifier = Modifier.height(20.dp))
                             Button(
                                 onClick = {
@@ -285,10 +357,7 @@ fun AprendeCameraPracticeScreen(
                                     } catch (e: Exception) {
                                         e.printStackTrace()
                                     }
-
-                                    // Doble garantía: asegura el registro al pulsar el botón de salida
                                     registerSuccessProgress()
-
                                     navController.popBackStack()
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = SigniaBluePrimary),
@@ -306,12 +375,14 @@ fun AprendeCameraPracticeScreen(
 
             // Feedback en tiempo real
             val isNoHand = keypointsCount == 0
+            val isUnknownSign = detectedWord == "Seña no registrada"
             val feedback = when {
                 isSuccess -> "¡Correcto! Seña validada."
-                isNoHand -> "Buscando mano frente a la cámara..."
-                else -> "Detectado: \"$detectedWord\". Realiza la seña: \"$targetWord\""
+                isNoHand -> "Muestra las manos a la cámara"
+                isUnknownSign -> "Seña no reconocida. ¡Inténtalo de nuevo!"
+                else -> "Detectado: \"$detectedWord\". Realiza la seña: \"$targetWord\" (Estabilidad: $consecutiveMatches/3)"
             }
-            val feedbackColor = if (isNoHand) SigniaBluePrimary else Color(0xFF4CAF50)
+            val feedbackColor = if (isNoHand || isUnknownSign) SigniaBluePrimary else Color(0xFF4CAF50)
 
             Surface(
                 shape = RoundedCornerShape(16.dp),
