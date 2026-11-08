@@ -1,7 +1,21 @@
-/build/
-/app/build/
-/.gradle/
-.idea/
-*.html
+# Carpetas generadas
+build/
+**/build/
+.gradle/
 .kotlin/
+
+# Android Studio
+.idea/
+*.iml
+
+# Archivos locales
 local.properties
+
+# Reportes HTML
+*.html
+
+# Archivos compilados
+*.class
+*.jar
+*.apk
+*.aab
