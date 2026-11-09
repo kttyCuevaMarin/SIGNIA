@@ -628,7 +628,7 @@ fun CameraRecognitionScreen(navController: NavController) {
                     Box(modifier = Modifier.padding(20.dp)) {
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = if (isHandPresent) "Seña reconocida:" else "Buscando manos...",
+                                text = if (recognizedWord == "Seña no registrada") "Resultado de la IA:" else if (isHandPresent) "Seña reconocida:" else "Buscando manos...",
                                 fontSize = if (isHandPresent) 13.sp else 11.sp,
                                 color = ThemeManager.subtextColor
                             )

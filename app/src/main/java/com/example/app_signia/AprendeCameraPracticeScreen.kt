@@ -106,7 +106,7 @@ fun AprendeCameraPracticeScreen(
                     keypointsCount = keypoints
                     allHandsLandmarksList = allHands
                     val cleanWord = rawWord.trim()
-                    detectedWord = if (cleanWord.isNotBlank() && cleanWord != "Seña no registrada") cleanWord else "Buscando manos..."
+                    detectedWord = if (cleanWord.isNotBlank()) cleanWord else "Buscando manos..."
 
                     if (keypoints > 0) {
                         val matchesTarget = cleanWord.equals(targetWord.trim(), ignoreCase = true) ||

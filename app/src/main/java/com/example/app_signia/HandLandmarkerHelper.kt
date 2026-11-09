@@ -148,6 +148,10 @@ class HandLandmarkerHelper(
         if (allHands.isEmpty()) {
             displayWord = "Buscando manos..."
             confidence = 0
+        } else if (displayWord == "Buscando manos...") {
+            // Mano presente pero ninguna seña válida reconocida -> mostrar "Seña no registrada"
+            displayWord = "Seña no registrada"
+            confidence = 0
         }
 
         onResults(result, displayWord, totalKeypoints, confidence, allHands)

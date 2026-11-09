@@ -215,7 +215,7 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
     LaunchedEffect(isRecognitionResultState) {
         if (isRecognitionResultState) {
             isProcessingAi = true
-            delay(1200L) // Simula análisis profundo con IA MediaPipe
+            delay(3500L) // Simula análisis profundo con IA MediaPipe (~3.5s)
             isProcessingAi = false
 
             val phraseToSpeak = if (recordedSigns.isNotEmpty()) recordedSigns.joinToString(" ") else currentDetectedWord
@@ -812,21 +812,23 @@ fun TranslationDetailsCameraScreen(navController: NavController) {
                                         .padding(vertical = 28.dp, horizontal = 24.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
+                                    val signNotRecognized = finalTranslation == "Seña no registrada"
+
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.CheckCircle,
+                                            imageVector = if (signNotRecognized) Icons.Default.Warning else Icons.Default.CheckCircle,
                                             contentDescription = null,
-                                            tint = SigniaBluePrimary,
+                                            tint = if (signNotRecognized) Color(0xFFE53935) else SigniaBluePrimary,
                                             modifier = Modifier.size(20.dp)
                                         )
                                         Text(
-                                            text = "Seña detectada con IA",
+                                            text = if (signNotRecognized) "Seña no reconocida" else "Seña detectada con IA",
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = SigniaBluePrimary
+                                            color = if (signNotRecognized) Color(0xFFE53935) else SigniaBluePrimary
                                         )
                                     }
 
