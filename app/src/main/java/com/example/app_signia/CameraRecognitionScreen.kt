@@ -54,6 +54,8 @@ import java.io.File
 import java.util.Locale
 
 /**
+ * Traductor en vivo
+
  * AVATAR DE PERFIL REUTILIZABLE (AZUL OFICIAL SIGNIA)
  */
 @Composable

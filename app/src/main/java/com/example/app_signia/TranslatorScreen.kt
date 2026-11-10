@@ -32,6 +32,9 @@ import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 import kotlinx.coroutines.delay
 
+/*
+Texto o voz a señas
+ */
 val SigniaBlueButtonColor = Color(0xFF2196F3)
 
 /**

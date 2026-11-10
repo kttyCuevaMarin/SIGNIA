@@ -32,6 +32,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 /**
+ * Mi RACHA
  * PANTALLA DE RACHA DE APRENDIZAJE (RF17 - Mi Racha)
  * Visualización completa del progreso diario, calendario mensual y seguimiento de constancia
  * con la paleta de colores oficial de SIGNIA (Púrpura, Lila, Lavanda y Azul).

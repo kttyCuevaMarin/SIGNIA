@@ -33,6 +33,7 @@ import com.google.firebase.auth.auth
 val SigniaBlueAccent = Color(0xFF2196F3)
 
 /**
+ * Animacion de señas(LSP)
  * RF07 - MOSTRAR ANIMACIÓN DE LAS SEÑAS EN SECUENCIA
  * Reproduce de manera secuencial y fluida las animaciones de las señas encontradas,
  * sin parálisis de video ni errores de cambio de recurso.

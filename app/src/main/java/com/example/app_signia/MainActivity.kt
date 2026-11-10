@@ -121,9 +121,6 @@ class MainActivity : ComponentActivity() {
                         composable("sign_scan_details") {
                             SignScanDetailsScreen(navController = navController)
                         }
-                        composable("translation_details_camera") {
-                            TranslationDetailsCameraScreen(navController = navController)
-                        }
                         composable(
                             route = "animation_player/{message}",
                             arguments = listOf(navArgument("message") { type = NavType.StringType })

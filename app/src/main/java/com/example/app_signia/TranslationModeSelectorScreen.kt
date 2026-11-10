@@ -27,6 +27,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 
+/*
+Que quieres hacer hoy
+ */
+
 // ================================================================
 // COLORES OFICIALES SIGNIA (AGENTS.md & Color.kt)
 // ================================================================

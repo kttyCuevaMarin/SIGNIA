@@ -28,6 +28,10 @@ import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
+/*
+Marcar como seña aprendida
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignDetailScreen(

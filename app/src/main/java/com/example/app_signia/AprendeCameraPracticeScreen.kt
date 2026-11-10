@@ -41,6 +41,9 @@ import com.google.firebase.auth.auth
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import java.util.concurrent.Executors
 
+/**
+Practicar
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AprendeCameraPracticeScreen(

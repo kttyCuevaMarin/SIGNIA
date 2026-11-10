@@ -33,6 +33,8 @@ data class LearningCategory(
 )
 
 /**
+ * ¿Que quieres aprender hoy?
+
  * PANTALLA DEL MÓDULO EDUCATIVO APRENDE LSP (RF08, RF10, RF17)
  */
 @OptIn(ExperimentalMaterial3Api::class)

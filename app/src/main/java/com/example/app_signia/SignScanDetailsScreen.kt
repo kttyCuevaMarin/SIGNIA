@@ -58,7 +58,7 @@ import kotlinx.coroutines.delay
 import java.util.Locale
 
 /**
- * PANTALLA DE CÁMARA 2: DETALLES DE TRADUCCIÓN / ESCANEO CON CAPTURA
+ * PANTALLA DE CÁMARA 2: DETALLES DE TRADUCCION / ESCANEO CON CAPTURA
  * Cumple estrictamente con RF2, RF3 y RF14.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -969,7 +969,6 @@ fun SignScanDetailsScreen(navController: NavController) {
                                     fontSize = 16.sp
                                 )
                             }
-
                             Spacer(modifier = Modifier.height(32.dp))
                         }
                     }

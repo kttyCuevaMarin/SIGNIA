@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 
 /**
+ * MODULO: palabra
  * RF08 - MÓDULO APRENDE LSP (LISTA DE SEÑAS POR CATEGORÍA)
  */
 @OptIn(ExperimentalMaterial3Api::class)
