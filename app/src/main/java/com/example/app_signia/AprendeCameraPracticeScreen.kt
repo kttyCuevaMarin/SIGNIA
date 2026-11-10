@@ -41,9 +41,6 @@ import com.google.firebase.auth.auth
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import java.util.concurrent.Executors
 
-/**
- * RF16 - PRÁCTICA DE SEÑAS CON CÁMARA E IA (MEDIAPIPE + TEACHABLE MACHINE ESTABILIZADO)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AprendeCameraPracticeScreen(
@@ -109,12 +106,14 @@ fun AprendeCameraPracticeScreen(
                     detectedWord = if (cleanWord.isNotBlank()) cleanWord else "Buscando manos..."
 
                     if (keypoints > 0) {
-                        val matchesTarget = cleanWord.equals(targetWord.trim(), ignoreCase = true) ||
-                                cleanWord.contains(targetWord.trim(), ignoreCase = true)
+                        // COMPARACIÓN ROBUSTA: ignora acentos, signos, espacios, mayúsculas/minúsculas
+                        val normalizedDetected = SignDictionary.normalizeForComparison(cleanWord)
+                        val normalizedTarget = SignDictionary.normalizeForComparison(targetWord)
+
+                        val matchesTarget = normalizedDetected == normalizedTarget
 
                         if (matchesTarget) {
                             consecutiveMatches++
-                            // Exige 3 detecciones consecutivas estables para evitar falsos positivos prematuros
                             if (consecutiveMatches >= 3 && !isSuccess) {
                                 isSuccess = true
                                 isDestroyed.value = true
@@ -126,7 +125,6 @@ fun AprendeCameraPracticeScreen(
                                 registerSuccessProgress()
                             }
                         } else {
-                            // Reinicia el contador si cambia de seña para evitar acumulación errónea
                             if (consecutiveMatches > 0) consecutiveMatches--
                         }
                     } else {
@@ -145,16 +143,8 @@ fun AprendeCameraPracticeScreen(
     DisposableEffect(Unit) {
         onDispose {
             isDestroyed.value = true
-            try {
-                handHelper.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            try {
-                cameraExecutor.shutdown()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            try { handHelper.close() } catch (e: Exception) { e.printStackTrace() }
+            try { cameraExecutor.shutdown() } catch (e: Exception) { e.printStackTrace() }
         }
     }
 
@@ -166,11 +156,7 @@ fun AprendeCameraPracticeScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         isDestroyed.value = true
-                        try {
-                            cameraExecutor.shutdown()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+                        try { cameraExecutor.shutdown() } catch (e: Exception) { e.printStackTrace() }
                         navController.popBackStack()
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = ThemeManager.textColor)
@@ -189,7 +175,6 @@ fun AprendeCameraPracticeScreen(
         ) {
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Tarjeta de Objetivo
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -212,7 +197,6 @@ fun AprendeCameraPracticeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Visor de Cámara con IA y Canvas de MediaPipe
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -261,7 +245,7 @@ fun AprendeCameraPracticeScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // CANVAS PARA DIBUJAR PUNTOS CLAVE DE MEDIAPIPE EN TIEMPO REAL (Estilo Python MediaPipe)
+                // CANVAS CON LOS 21 PUNTOS DE MEDIAPIPE (SIEMPRE VISIBLE)
                 if (allHandsLandmarksList.isNotEmpty()) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         val width = size.width
@@ -312,7 +296,6 @@ fun AprendeCameraPracticeScreen(
                     }
                 }
 
-                // Indicador de estado superior
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
@@ -328,7 +311,7 @@ fun AprendeCameraPracticeScreen(
                     )
                 }
 
-                // Pantalla de éxito al acertar de forma segura
+                // ANIMACIÓN DE ÉXITO (CheckCircle) - SIEMPRE PRESENTE CUANDO isSuccess = true
                 if (isSuccess) {
                     Box(
                         modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.85f)),
@@ -352,11 +335,7 @@ fun AprendeCameraPracticeScreen(
                             Button(
                                 onClick = {
                                     isDestroyed.value = true
-                                    try {
-                                        cameraExecutor.shutdown()
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                    }
+                                    try { cameraExecutor.shutdown() } catch (e: Exception) { e.printStackTrace() }
                                     registerSuccessProgress()
                                     navController.popBackStack()
                                 },
@@ -373,7 +352,6 @@ fun AprendeCameraPracticeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Feedback en tiempo real
             val isNoHand = keypointsCount == 0
             val isUnknownSign = detectedWord == "Seña no registrada"
             val feedback = when {
