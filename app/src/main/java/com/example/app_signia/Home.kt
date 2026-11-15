@@ -22,7 +22,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.app_signia.ui.theme.*
@@ -32,7 +34,7 @@ import com.google.firebase.auth.auth
 data class SigniaModule(
     val title: String,
     val description: String,
-    val icon: ImageVector,
+    val iconRes: Int,
     val route: String,
     val cardBgColor: Color,
     val textColor: Color,
@@ -75,7 +77,7 @@ fun Home(navController: NavController = rememberNavController()) {
         SigniaModule(
             title = "Reconocimiento de Señas",
             description = "Usa la cámara en vivo para capturar tus manos y reconocer señas LSP.",
-            icon = Icons.Default.CameraAlt,
+            iconRes = R.drawable.mod_camara,
             route = "camera_recognition",
             cardBgColor = ThemeManager.heroCardColor,
             textColor = Color.White,
@@ -84,7 +86,7 @@ fun Home(navController: NavController = rememberNavController()) {
         SigniaModule(
             title = "Traducción lenguaje de señas",
             description = "Selecciona el modo de traducción por cámara en vivo o por texto/voz.",
-            icon = Icons.Default.RecordVoiceOver,
+            iconRes = R.drawable.mod_traduccion,
             route = "translation_mode_selector",
             cardBgColor = ThemeManager.cardBackgroundColor,
             textColor = ThemeManager.textColor,
@@ -93,7 +95,7 @@ fun Home(navController: NavController = rememberNavController()) {
         SigniaModule(
             title = "Aprende LSP",
             description = "Módulo educativo organizado por categorías: Saludos, familia, números y más.",
-            icon = Icons.Default.School,
+            iconRes = R.drawable.mod_aprende,
             route = "aprende_lsp",
             cardBgColor = ThemeManager.heroCardColor,
             textColor = Color.White,
@@ -102,7 +104,7 @@ fun Home(navController: NavController = rememberNavController()) {
         SigniaModule(
             title = "Guía de Uso",
             description = "Manual interactivo para aprender a posicionar las manos y optimizar la traducción.",
-            icon = Icons.AutoMirrored.Filled.MenuBook,
+            iconRes = R.drawable.mod_guia,
             route = "translation_mode_selector",
             cardBgColor = ThemeManager.cardBackgroundColor,
             textColor = ThemeManager.textColor
@@ -145,11 +147,12 @@ fun Home(navController: NavController = rememberNavController()) {
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.LocalFireDepartment,
-                            contentDescription = "Racha de aprendizaje",
-                            tint = SigniaBluePrimary,
-                            modifier = Modifier.size(20.dp)
+                        Image(
+                            painter = painterResource(id = R.drawable.mascot_racha),
+                            contentDescription = "Mascota Racha",
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
@@ -358,17 +361,14 @@ fun Home(navController: NavController = rememberNavController()) {
                                 ) {
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
-                                        color = SigniaBluePrimary,
-                                        modifier = Modifier.size(40.dp)
+                                        color = Color.Transparent,
+                                        modifier = Modifier.size(44.dp)
                                     ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = module.icon,
-                                                contentDescription = module.title,
-                                                tint = Color.White,
-                                                modifier = Modifier.size(22.dp)
-                                            )
-                                        }
+                                        Image(
+                                            painter = painterResource(id = module.iconRes),
+                                            contentDescription = module.title,
+                                            modifier = Modifier.size(44.dp)
+                                        )
                                     }
                                     if (module.badgeText != null) {
                                         Surface(

@@ -20,7 +20,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.*
+import androidx.compose.ui.draw.scale
+import android.net.Uri
+import android.widget.VideoView
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
@@ -104,21 +111,8 @@ fun RachaScreen(navController: NavController) {
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Icono de Fuego en Círculo
-                    Surface(
-                        modifier = Modifier.size(72.dp),
-                        shape = CircleShape,
-                        color = SigniaBluePrimary.copy(alpha = 0.25f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.LocalFireDepartment,
-                                contentDescription = "Fuego de racha",
-                                tint = SigniaBluePrimary,
-                                modifier = Modifier.size(46.dp)
-                            )
-                        }
-                    }
+                    // Video animación de racha reproduciéndose en bucle
+                    RachaVideoAnimationView()
 
                     Spacer(modifier = Modifier.height(14.dp))
 
@@ -449,4 +443,37 @@ fun RachaScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
+}
+
+/**
+ * Componente que reproduce el video de animación de racha en bucle (VideoView).
+ */
+@Composable
+fun RachaVideoAnimationView() {
+    val rawResourceId = R.raw.racha_anim
+
+    AndroidView(
+        factory = { ctx ->
+            VideoView(ctx).apply {
+                setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                val videoUri = Uri.parse("android.resource://${ctx.packageName}/$rawResourceId")
+                setVideoURI(videoUri)
+                setOnPreparedListener { mediaPlayer ->
+                    mediaPlayer.isLooping = true
+                }
+                setOnCompletionListener {
+                    start()
+                }
+                start()
+            }
+        },
+        update = { videoView ->
+            if (!videoView.isPlaying) {
+                videoView.start()
+            }
+        },
+        modifier = Modifier
+            .size(150.dp)
+            .clip(CircleShape)
+    )
 }

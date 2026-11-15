@@ -360,6 +360,7 @@ fun RegisterView(navController: NavController) {
                         fontSize = 14.sp
                     )
                 }
+
             }
         }
     }

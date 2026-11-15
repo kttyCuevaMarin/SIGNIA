@@ -3,6 +3,8 @@ package com.example.app_signia
 import android.Manifest
 import android.content.pm.PackageManager
 import android.widget.Toast
+import android.net.Uri
+import android.widget.VideoView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -324,12 +326,7 @@ fun AprendeCameraPracticeScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(20.dp)
                         ) {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(72.dp)
-                            )
+                            SuccessVideoAnimationView()
                             Spacer(modifier = Modifier.height(12.dp))
                             Text("¡Excelente! Seña Correcta", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
                             Spacer(modifier = Modifier.height(4.dp))
@@ -392,4 +389,37 @@ fun AprendeCameraPracticeScreen(
             }
         }
     }
+}
+
+/**
+ * Componente que reproduce el video de éxito de práctica en bucle continuo (VideoView).
+ */
+@Composable
+fun SuccessVideoAnimationView() {
+    val rawResourceId = R.raw.success_anim
+
+    AndroidView(
+        factory = { ctx ->
+            VideoView(ctx).apply {
+                setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                val videoUri = Uri.parse("android.resource://${ctx.packageName}/$rawResourceId")
+                setVideoURI(videoUri)
+                setOnPreparedListener { mediaPlayer ->
+                    mediaPlayer.isLooping = true
+                }
+                setOnCompletionListener {
+                    start()
+                }
+                start()
+            }
+        },
+        update = { videoView ->
+            if (!videoView.isPlaying) {
+                videoView.start()
+            }
+        },
+        modifier = Modifier
+            .size(160.dp)
+            .clip(RoundedCornerShape(16.dp))
+    )
 }
