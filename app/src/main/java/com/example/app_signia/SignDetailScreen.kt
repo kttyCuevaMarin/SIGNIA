@@ -250,7 +250,7 @@ fun SignDetailScreen(
                     Icon(Icons.Default.Videocam, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Practicar con Cámara e IA 🔥",
+                        text = "Ahora es tu turno, Practica con camara!!",
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )

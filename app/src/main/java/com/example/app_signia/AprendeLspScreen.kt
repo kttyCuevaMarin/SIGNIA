@@ -18,6 +18,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
@@ -191,17 +195,17 @@ fun AprendeLspScreen(navController: NavController) {
                     ) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = SigniaBluePrimary,
+                            color = Color.Transparent,
                             modifier = Modifier.size(46.dp)
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.EmojiEvents,
-                                    contentDescription = "Trofeo",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(26.dp)
-                                )
-                            }
+                            Image(
+                                painter = painterResource(id = R.drawable.trofeo),
+                                contentDescription = "Trofeo",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Crop
+                            )
                         }
 
                         Spacer(modifier = Modifier.width(14.dp))

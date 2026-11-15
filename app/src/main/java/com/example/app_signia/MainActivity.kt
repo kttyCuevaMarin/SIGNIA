@@ -19,6 +19,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.app_signia.ui.theme.APPSIGNIATheme
 import com.example.app_signia.ui.theme.ThemeManager
+import com.example.app_signia.ui.theme.SigniaBluePrimary
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.CircularProgressIndicator
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,16 +51,37 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            val auth = Firebase.auth
+            var isCheckingAuth by remember { mutableStateOf(true) }
+            var currentUser by remember { mutableStateOf<com.google.firebase.auth.FirebaseUser?>(null) }
+
+            LaunchedEffect(Unit) {
+                kotlinx.coroutines.delay(150)
+                currentUser = auth.currentUser
+                isCheckingAuth = false
+            }
+
             APPSIGNIATheme {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(currentBgColor)
                 ) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = "login"
-                    ) {
+                    if (isCheckingAuth) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = SigniaBluePrimary)
+                        }
+                    } else {
+                        val navController = rememberNavController()
+                        val initialRoute = if (currentUser != null) "home" else "login"
+
+                        NavHost(
+                            navController = navController,
+                            startDestination = initialRoute
+                        ) {
                         composable("login") {
                             Login(navController)
                         }
@@ -106,6 +133,9 @@ class MainActivity : ComponentActivity() {
                         composable("perfil") {
                             PerfilScreen(navController = navController)
                         }
+                        composable("editar_perfil") {
+                            EditarPerfilScreen(navController = navController)
+                        }
                         composable("camera_recognition") {
                             CameraRecognitionScreen(navController = navController)
                         }
@@ -129,6 +159,7 @@ class MainActivity : ComponentActivity() {
                             SignAnimationScreen(navController = navController, message = messageParam)
                         }
                     }
+                  }
                 }
             }
         }

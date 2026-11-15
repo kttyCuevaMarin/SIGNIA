@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -36,6 +37,10 @@ import androidx.navigation.NavController
 import com.example.app_signia.ui.theme.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.auth.UserProfileChangeRequest
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
 import java.io.File
 import java.io.FileOutputStream
 
@@ -56,12 +61,35 @@ fun PerfilScreen(navController: NavController) {
         StreakManager.loadStreakForUser(currentUser?.uid)
     }
 
-    val nombreUsuario = currentUser?.displayName
-        ?: currentUser?.email?.substringBefore("@")?.replaceFirstChar { it.uppercase() }
-        ?: "Usuario SIGNIA"
+    var displayNameState by remember {
+        mutableStateOf(ProfileManager.getFullName(context, currentUser?.displayName ?: "Usuario SIGNIA"))
+    }
+    var locationState by remember {
+        mutableStateOf(ProfileManager.getLocation(context, "Lima, Perú"))
+    }
+    var roleIndexState by remember {
+        mutableStateOf(ProfileManager.getRoleIndex(context, 0))
+    }
     val correoUsuario = currentUser?.email ?: "correo@ejemplo.com"
 
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                displayNameState = ProfileManager.getFullName(context, currentUser?.displayName ?: "Usuario SIGNIA")
+                locationState = ProfileManager.getLocation(context, "Lima, Perú")
+                roleIndexState = ProfileManager.getRoleIndex(context, 0)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     var profileBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    var pendingEditingBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var showZoomDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val savedBitmap = loadSavedProfilePhoto(context)
@@ -78,14 +106,32 @@ fun PerfilScreen(navController: NavController) {
                 val inputStream = context.contentResolver.openInputStream(uri)
                 val bitmap = BitmapFactory.decodeStream(inputStream)
                 if (bitmap != null) {
-                    saveProfilePhotoToDisk(context, bitmap)
-                    profileBitmap = bitmap.asImageBitmap()
-                    Toast.makeText(context, "¡Foto de perfil guardada con éxito!", Toast.LENGTH_SHORT).show()
+                    pendingEditingBitmap = bitmap
                 }
             } catch (_: Exception) {
                 Toast.makeText(context, "Error al procesar la imagen", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    if (pendingEditingBitmap != null) {
+        ProfilePhotoEditorDialog(
+            initialBitmap = pendingEditingBitmap!!,
+            onDismiss = { pendingEditingBitmap = null },
+            onSave = { editedBitmap ->
+                saveProfilePhotoToDisk(context, editedBitmap)
+                profileBitmap = editedBitmap.asImageBitmap()
+                pendingEditingBitmap = null
+                Toast.makeText(context, "¡Foto de perfil guardada con éxito!", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    if (showZoomDialog && profileBitmap != null) {
+        ProfileZoomDialog(
+            bitmap = profileBitmap!!,
+            onDismiss = { showZoomDialog = false }
+        )
     }
 
     Scaffold(
@@ -129,7 +175,13 @@ fun PerfilScreen(navController: NavController) {
                 modifier = Modifier.size(120.dp)
             ) {
                 Surface(
-                    modifier = Modifier.size(120.dp),
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clickable {
+                            if (profileBitmap != null) {
+                                showZoomDialog = true
+                            }
+                        },
                     shape = CircleShape,
                     color = ThemeManager.cardBackgroundColor,
                     shadowElevation = 4.dp
@@ -172,14 +224,74 @@ fun PerfilScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Nombre del Usuario
+            // Nombre del Usuario con icono de lápiz para editar
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { navController.navigate("editar_perfil") }
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = displayNameState,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = ThemeManager.textColor,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Editar nombre",
+                    tint = SigniaBluePrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = nombreUsuario,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = ThemeManager.textColor,
+                text = "📍 $locationState",
+                fontSize = 13.sp,
+                color = ThemeManager.subtextColor,
                 textAlign = TextAlign.Center
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+            val roleTitle = when (roleIndexState) {
+                1 -> "Persona Sorda / Nativo LSP"
+                2 -> "Educador / Intérprete"
+                else -> "Oyente Aprendiendo"
+            }
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = SigniaBluePrimary.copy(alpha = 0.2f)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = when (roleIndexState) {
+                            1 -> Icons.Default.SignLanguage
+                            2 -> Icons.Default.School
+                            else -> Icons.Default.Verified
+                        },
+                        contentDescription = null,
+                        tint = SigniaBluePrimary,
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Text(
+                        text = roleTitle,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SigniaBluePrimary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Correo del Usuario
             Text(
@@ -438,4 +550,151 @@ private fun loadSavedProfilePhoto(context: Context): Bitmap? {
     } catch (e: Exception) {
         null
     }
+}
+
+/**
+ * Diálogo de edición de foto de perfil (Rotar 90°).
+ */
+@Composable
+fun ProfilePhotoEditorDialog(
+    initialBitmap: Bitmap,
+    onDismiss: () -> Unit,
+    onSave: (Bitmap) -> Unit
+) {
+    var workingBitmap by remember { mutableStateOf(initialBitmap) }
+
+    fun rotateImage() {
+        val matrix = android.graphics.Matrix().apply { postRotate(90f) }
+        workingBitmap = Bitmap.createBitmap(
+            workingBitmap, 0, 0,
+            workingBitmap.width, workingBitmap.height,
+            matrix, true
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Editar Foto de Perfil",
+                fontWeight = FontWeight.Bold,
+                color = ThemeManager.textColor
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(240.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(ThemeManager.cardBackgroundColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        bitmap = workingBitmap.asImageBitmap(),
+                        contentDescription = "Vista previa",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    OutlinedButton(
+                        onClick = { rotateImage() },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = SigniaBluePrimary)
+                    ) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Rotar 90°")
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSave(workingBitmap) },
+                colors = ButtonDefaults.buttonColors(containerColor = SigniaBluePrimary)
+            ) {
+                Text("Guardar y Aplicar", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", color = ThemeManager.subtextColor)
+            }
+        },
+        containerColor = ThemeManager.backgroundColor
+    )
+}
+
+/**
+ * Diálogo para ver la foto de perfil en grande con Zoom interactivo y arrastre.
+ */
+@Composable
+fun ProfileZoomDialog(
+    bitmap: ImageBitmap,
+    onDismiss: () -> Unit
+) {
+    var scale by remember { mutableStateOf(1f) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cerrar", color = SigniaBluePrimary, fontWeight = FontWeight.Bold)
+            }
+        },
+        title = {
+            Text("Mi foto de perfil ", fontWeight = FontWeight.Bold, color = ThemeManager.textColor)
+        },
+        text = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Black)
+                    .pointerInput(Unit) {
+                        detectTransformGestures { _, pan, zoom, _ ->
+                            scale = (scale * zoom).coerceIn(1f, 5f)
+                            if (scale > 1f) {
+                                offsetX += pan.x
+                                offsetY += pan.y
+                            } else {
+                                offsetX = 0f
+                                offsetY = 0f
+                            }
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = "Foto ampliada con zoom",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer(
+                            scaleX = scale,
+                            scaleY = scale,
+                            translationX = offsetX,
+                            translationY = offsetY
+                        ),
+                    contentScale = ContentScale.Fit
+                )
+            }
+        },
+        containerColor = ThemeManager.backgroundColor
+    )
 }

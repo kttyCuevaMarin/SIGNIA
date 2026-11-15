@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.app_signia.ui.theme.*
@@ -286,20 +287,14 @@ fun Home(navController: NavController = rememberNavController()) {
                                 color = ThemeManager.subtextColor
                             )
                         }
-                        Surface(
-                            shape = CircleShape,
-                            color = SigniaBlueSecondary.copy(alpha = 0.3f),
-                            modifier = Modifier.size(44.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                                    contentDescription = null,
-                                    tint = SigniaBluePrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
+                        Image(
+                            painter = painterResource(id = R.drawable.progreso),
+                            contentDescription = "Progreso",
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
