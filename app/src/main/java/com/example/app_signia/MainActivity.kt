@@ -136,6 +136,9 @@ class MainActivity : ComponentActivity() {
                         composable("editar_perfil") {
                             EditarPerfilScreen(navController = navController)
                         }
+                        composable("guia_uso") {
+                            GuiaUsoScreen(navController = navController)
+                        }
                         composable("camera_recognition") {
                             CameraRecognitionScreen(navController = navController)
                         }

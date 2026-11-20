@@ -106,7 +106,7 @@ fun Home(navController: NavController = rememberNavController()) {
             title = "Guía de Uso",
             description = "Manual interactivo para aprender a posicionar las manos y optimizar la traducción.",
             iconRes = R.drawable.mod_guia,
-            route = "translation_mode_selector",
+            route = "guia_uso",
             cardBgColor = ThemeManager.cardBackgroundColor,
             textColor = ThemeManager.textColor
         )
